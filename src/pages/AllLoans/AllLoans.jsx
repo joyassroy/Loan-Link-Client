@@ -2,7 +2,7 @@ import { useState } from "react";
 import useAxiosPublic from "../../hooks/useAxiosPublic";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { FaSearch, FaFilter, FaDollarSign, FaPercent, FaArrowRight, FaLayerGroup, FaMoneyCheckAlt } from "react-icons/fa";
+import { FaSearch, FaFilter, FaDollarSign, FaPercent, FaArrowRight, FaLayerGroup, FaRedo } from "react-icons/fa";
 
 const AllLoans = () => {
     const axiosPublic = useAxiosPublic();
@@ -18,12 +18,29 @@ const AllLoans = () => {
         }
     });
 
-    // --- 2. FILTERING LOGIC ---
+    // --- 2. SMART FILTERING LOGIC (Fixed) ---
     const filteredLoans = loans.filter(loan => {
-        const matchTitle = loan.title.toLowerCase().includes(search.toLowerCase());
-        const matchCategory = category ? loan.category === category : true;
+        // Search Logic (Safe check)
+        const title = loan.title ? loan.title.toLowerCase() : "";
+        const matchTitle = title.includes(search.toLowerCase());
+
+        // Category Logic (Safe & Flexible check)
+        // ডাটাবেসে 'Business' থাকুক বা 'Business Loan', ড্রপডাউনের 'Business' এর সাথে ম্যাচ করবে।
+        const dbCategory = loan.category ? loan.category.toLowerCase() : "";
+        const filterCategory = category.toLowerCase();
+
+        const matchCategory = category 
+            ? dbCategory.includes(filterCategory) // Partial match allowed
+            : true;
+        
         return matchTitle && matchCategory;
     });
+
+    // Reset Function
+    const handleReset = () => {
+        setSearch('');
+        setCategory('');
+    };
 
     // Loading State
     if (isLoading) {
@@ -41,15 +58,15 @@ const AllLoans = () => {
             <div className="relative bg-gradient-to-r from-primary to-secondary py-16 px-4 text-center text-white">
                 <div className="relative z-10 max-w-3xl mx-auto space-y-3">
                     <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">
-                        Choose Your Loan
+                        Explore Loan Packages
                     </h2>
                     <p className="text-white/90 text-lg font-light">
-                        Select a loan package below to start your application and receive funds.
+                        Find the perfect financial solution tailored to your needs.
                     </p>
                 </div>
             </div>
 
-            {/* --- SEARCH & FILTER --- */}
+            {/* --- SEARCH & FILTER BAR --- */}
             <div className="container mx-auto px-4 -mt-8 relative z-20">
                 <div className="bg-white p-4 md:p-6 rounded-2xl shadow-xl flex flex-col md:flex-row gap-4 items-center justify-between border border-gray-100">
                     
@@ -58,25 +75,28 @@ const AllLoans = () => {
                         <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input 
                             type="text" 
-                            placeholder="Search loans (e.g., Business, Home)..." 
+                            placeholder="Search by loan title..." 
                             className="input input-bordered w-full pl-12 rounded-xl focus:ring-2 ring-primary/20 bg-gray-50 focus:bg-white transition-all"
+                            value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
                     </div>
 
-                    {/* Category Filter */}
+                    {/* Category Filter (Simplified Values) */}
                     <div className="relative w-full md:w-1/4">
                         <FaFilter className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                         <select 
                             className="select select-bordered w-full pl-12 rounded-xl focus:ring-2 ring-primary/20 bg-gray-50 focus:bg-white cursor-pointer"
                             onChange={(e) => setCategory(e.target.value)}
+                            value={category}
                         >
                             <option value="">All Categories</option>
-                            <option value="Personal Loan">Personal Loan</option>
-                            <option value="Business Loan">Business Loan</option>
-                            <option value="Home Loan">Home Loan</option>
-                            <option value="Vehicle Loan">Vehicle Loan</option>
-                            <option value="Education Loan">Education Loan</option>
+                            {/* Value তে ছোট শব্দ রাখো যাতে ম্যাচ করতে সুবিধা হয় */}
+                            <option value="Personal">Personal Loan</option>
+                            <option value="Business">Business Loan</option>
+                            <option value="Home">Home Loan</option>
+                            <option value="Vehicle">Vehicle Loan</option>
+                            <option value="Education">Education Loan</option>
                         </select>
                     </div>
                 </div>
@@ -119,7 +139,6 @@ const AllLoans = () => {
                                             </div>
                                             <div>
                                                 <p className="text-xs text-gray-500 font-bold uppercase">Max Limit</p>
-                                                {/* Handle different field names from DB */}
                                                 <p className="font-bold text-gray-800">${loan.maxLoanLimit || loan.maxLimit}</p>
                                             </div>
                                         </div>
@@ -136,7 +155,7 @@ const AllLoans = () => {
                                     </div>
                                 </div>
 
-                                {/* Action Button (Step 1 towards Payment) */}
+                                {/* Action Button */}
                                 <div className="p-6 pt-0 mt-auto">
                                     <Link to={`/loans/${loan._id}`}>
                                         <button className="btn btn-primary w-full rounded-xl text-lg text-white shadow-lg shadow-primary/30 flex items-center justify-center gap-2 group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-secondary transition-all border-none">
@@ -144,20 +163,30 @@ const AllLoans = () => {
                                         </button>
                                     </Link>
                                     <p className="text-xs text-center text-gray-400 mt-2">
-                                        Apply now to unlock payment options
+                                        Simple & Fast Process
                                     </p>
                                 </div>
                             </div>
                         ))}
                     </div>
                 ) : (
-                    // No Data Found View
-                    <div className="text-center py-20">
+                    // --- NO DATA FOUND UI (Smart Reset) ---
+                    <div className="text-center py-20 bg-white rounded-3xl shadow-sm border border-gray-100 max-w-lg mx-auto">
                         <div className="bg-gray-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400 text-4xl">
                             <FaLayerGroup />
                         </div>
                         <h3 className="text-2xl font-bold text-gray-600">No Loans Found</h3>
-                        <p className="text-gray-500">Try adjusting your search or filter.</p>
+                        <p className="text-gray-500 px-6">
+                            We couldn't find any loans matching "{search}" in the "{category}" category.
+                        </p>
+                        
+                        {/* Reset Button */}
+                        <button 
+                            onClick={handleReset} 
+                            className="btn btn-outline btn-primary mt-6 rounded-full px-8 gap-2"
+                        >
+                            <FaRedo /> Clear Filters
+                        </button>
                     </div>
                 )}
             </div>
