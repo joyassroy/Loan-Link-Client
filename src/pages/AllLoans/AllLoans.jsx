@@ -2,29 +2,26 @@ import { useState } from "react";
 import useAxiosPublic from "../../hooks/useAxiosPublic";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { FaSearch, FaFilter, FaDollarSign, FaPercent, FaArrowRight, FaLayerGroup } from "react-icons/fa";
+import { FaSearch, FaFilter, FaDollarSign, FaPercent, FaArrowRight, FaLayerGroup, FaMoneyCheckAlt } from "react-icons/fa";
 
 const AllLoans = () => {
     const axiosPublic = useAxiosPublic();
     const [search, setSearch] = useState('');
     const [category, setCategory] = useState('');
 
-    // --- 1. DATA FETCHING (তোমার লজিক) ---
+    // --- 1. DATA FETCHING ---
     const { data: loans = [], isLoading } = useQuery({
-        queryKey: ['all-loans'], // এখানে সার্চ/ক্যাটাগরি কি না দিলেও চলে কারণ আমরা ক্লায়েন্ট সাইডে ফিল্টার করছি
+        queryKey: ['all-loans'], 
         queryFn: async () => {
             const res = await axiosPublic.get('/loans');
             return res.data;
         }
     });
 
-    // --- 2. CLIENT SIDE FILTERING (তোমার লজিক) ---
+    // --- 2. FILTERING LOGIC ---
     const filteredLoans = loans.filter(loan => {
-        // সার্চ লজিক: টাইটেল চেক করবে
         const matchTitle = loan.title.toLowerCase().includes(search.toLowerCase());
-        // ক্যাটাগরি লজিক: যদি ক্যাটাগরি সিলেক্ট করা থাকে তবেই চেক করবে
         const matchCategory = category ? loan.category === category : true;
-        
         return matchTitle && matchCategory;
     });
 
@@ -40,19 +37,19 @@ const AllLoans = () => {
     return (
         <div className="min-h-screen bg-gray-50 font-sans pb-20">
             
-            {/* --- HERO HEADER (PREMIUM DESIGN) --- */}
+            {/* --- HERO HEADER --- */}
             <div className="relative bg-gradient-to-r from-primary to-secondary py-16 px-4 text-center text-white">
                 <div className="relative z-10 max-w-3xl mx-auto space-y-3">
                     <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">
-                        All Available Loans
+                        Choose Your Loan
                     </h2>
                     <p className="text-white/90 text-lg font-light">
-                        Find the perfect financial solution tailored to your needs.
+                        Select a loan package below to start your application and receive funds.
                     </p>
                 </div>
             </div>
 
-            {/* --- SEARCH & FILTER BAR (PREMIUM DESIGN + FUNCTIONALITY) --- */}
+            {/* --- SEARCH & FILTER --- */}
             <div className="container mx-auto px-4 -mt-8 relative z-20">
                 <div className="bg-white p-4 md:p-6 rounded-2xl shadow-xl flex flex-col md:flex-row gap-4 items-center justify-between border border-gray-100">
                     
@@ -61,7 +58,7 @@ const AllLoans = () => {
                         <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input 
                             type="text" 
-                            placeholder="Search by loan title..." 
+                            placeholder="Search loans (e.g., Business, Home)..." 
                             className="input input-bordered w-full pl-12 rounded-xl focus:ring-2 ring-primary/20 bg-gray-50 focus:bg-white transition-all"
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -85,7 +82,7 @@ const AllLoans = () => {
                 </div>
             </div>
 
-            {/* --- LOANS GRID (PREMIUM CARD DESIGN) --- */}
+            {/* --- LOANS GRID --- */}
             <div className="container mx-auto px-4 mt-12">
                 {filteredLoans.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -122,7 +119,7 @@ const AllLoans = () => {
                                             </div>
                                             <div>
                                                 <p className="text-xs text-gray-500 font-bold uppercase">Max Limit</p>
-                                                {/* ডাটাবেস ফিল্ড চেক: maxLoanLimit অথবা maxLimit */}
+                                                {/* Handle different field names from DB */}
                                                 <p className="font-bold text-gray-800">${loan.maxLoanLimit || loan.maxLimit}</p>
                                             </div>
                                         </div>
@@ -133,20 +130,22 @@ const AllLoans = () => {
                                             </div>
                                             <div>
                                                 <p className="text-xs text-gray-500 font-bold uppercase">Interest</p>
-                                                {/* ডাটাবেস ফিল্ড চেক: interest অথবা interestRate */}
                                                 <p className="font-bold text-gray-800">{loan.interest || loan.interestRate}%</p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Action Button */}
+                                {/* Action Button (Step 1 towards Payment) */}
                                 <div className="p-6 pt-0 mt-auto">
                                     <Link to={`/loans/${loan._id}`}>
                                         <button className="btn btn-primary w-full rounded-xl text-lg text-white shadow-lg shadow-primary/30 flex items-center justify-center gap-2 group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-secondary transition-all border-none">
-                                            View Details <FaArrowRight />
+                                            View & Apply <FaArrowRight />
                                         </button>
                                     </Link>
+                                    <p className="text-xs text-center text-gray-400 mt-2">
+                                        Apply now to unlock payment options
+                                    </p>
                                 </div>
                             </div>
                         ))}

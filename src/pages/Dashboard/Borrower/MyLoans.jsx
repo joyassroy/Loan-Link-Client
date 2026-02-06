@@ -2,123 +2,172 @@ import { useQuery } from "@tanstack/react-query";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import useAuth from "../../../hooks/useAuth";
 import { Link } from "react-router-dom";
-import { useState } from "react"; // 1. useState import korlam
+import { useState } from "react"; // ✅ useState আনা হয়েছে মডালের জন্য
+import { FaBriefcase, FaCheckCircle, FaTimesCircle, FaHourglassHalf, FaCreditCard, FaFileInvoiceDollar, FaReceipt, FaPrint } from "react-icons/fa";
 
 const MyLoans = () => {
     const { user } = useAuth();
     const axiosSecure = useAxiosSecure();
-    const [selectedPayment, setSelectedPayment] = useState(null); // 2. Modal data rakhar jonne state
+    
+    // ✅ রিসিপ্ট দেখানোর জন্য স্টেট
+    const [selectedReceipt, setSelectedReceipt] = useState(null);
 
+    // 1. Fetch Data
     const { data: loans = [], isLoading } = useQuery({
         queryKey: ['my-loans', user?.email],
         queryFn: async () => {
-            const res = await axiosSecure.get(`/applications/my-application?email=${user.email}`);
+            const res = await axiosSecure.get(`/applications?email=${user.email}`);
             return res.data;
         }
     });
 
     if (isLoading) {
-        return <div className="text-center mt-20"><span className="loading loading-spinner loading-lg"></span></div>;
+        return <div className="flex justify-center mt-20"><span className="loading loading-spinner loading-lg text-primary"></span></div>;
     }
 
     return (
-        <div className="w-full p-5">
-            <h2 className="text-3xl font-bold mb-6 text-center text-primary">My Loan History</h2>
+        <div className="w-full p-5 min-h-screen bg-gray-50/50">
+            <div className="text-center mb-10">
+                <h2 className="text-3xl font-extrabold text-gray-800">My Applications</h2>
+                <p className="text-gray-500 mt-2">Manage your applications & receipts</p>
+            </div>
             
-            <div className="overflow-x-auto bg-base-100 shadow-xl rounded-xl border">
-                <table className="table w-full">
-                    <thead className="bg-gray-100 text-gray-700 uppercase text-sm">
-                        <tr>
-                            <th>#</th>
-                            <th>Loan Category</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                            <th>Payment</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {loans.map((loan, index) => (
-                            <tr key={loan._id} className="hover">
-                                <th>{index + 1}</th>
-                                <td className="font-bold">{loan.loanCategory}</td>
-                                <td>${loan.loanAmount}</td>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {loans.length > 0 ? (
+                    loans.map((loan) => (
+                        <div key={loan._id} className="card bg-white shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100">
+                            <div className="card-body p-6">
                                 
-                                <td>
-                                    <div className={`badge ${
-                                        loan.status === 'approved' ? 'badge-success text-white' : 
-                                        loan.status === 'rejected' ? 'badge-error text-white' : 'badge-warning text-white'
-                                    }`}>
-                                        {loan.status}
+                                {/* Header */}
+                                <div className="flex items-center gap-4 mb-4">
+                                    <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl">
+                                        <FaBriefcase size={24} />
                                     </div>
-                                </td>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-gray-700 capitalize">{loan.loanCategory}</h3>
+                                        <p className="text-xs text-gray-400 font-mono">ID: {loan._id.slice(-6)}</p>
+                                    </div>
+                                </div>
 
-                                {/* --- 3. Payment Status & Challenge Logic --- */}
-                                <td>
-                                    {loan.paymentStatus === 'paid' ? (
-                                        // Paid hole Modal open korbe
-                                        <button 
-                                            onClick={() => setSelectedPayment(loan)}
-                                            className="btn btn-sm btn-outline btn-success font-bold"
-                                        >
-                                            Paid ✅
-                                        </button>
-                                    ) : (
-                                        <span className="text-red-400 font-bold">Unpaid</span>
-                                    )}
-                                </td>
+                                <div className="divider my-2"></div>
 
-                                <td>
-                                    {loan.paymentStatus === 'paid' ? (
-                                        <button className="btn btn-sm btn-disabled">Paid</button>
-                                    ) : loan.status === 'rejected' ? (
-                                        <button className="btn btn-sm btn-disabled">Rejected</button>
+                                {/* Details */}
+                                <div className="space-y-2 mb-6">
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-500 font-medium text-sm">Requested Amount</span>
+                                        <span className="font-bold text-gray-800 text-lg">${loan.loanAmount}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-500 font-medium text-sm">Application Date</span>
+                                        <span className="font-bold text-gray-600">{new Date(loan.appliedDate).toLocaleDateString()}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-500 font-medium text-sm">Application Fee</span>
+                                        <span className="badge badge-warning font-bold text-xs">$10.00</span>
+                                    </div>
+                                </div>
+
+                                {/* Actions Logic */}
+                                <div className="card-actions justify-end mt-auto">
+                                    
+                                    {loan.paymentStatus !== 'paid' ? (
+                                        // Unpaid State
+                                        <div className="w-full text-center">
+                                            <p className="text-xs text-red-400 mb-2 font-bold">⚠️ Fee required</p>
+                                            <Link to={`/dashboard/payment/${loan._id}`} className="w-full">
+                                                <button className="btn btn-primary w-full text-white shadow-lg animate-pulse hover:animate-none">
+                                                    <FaCreditCard /> Pay $10 Fee
+                                                </button>
+                                            </Link>
+                                        </div>
                                     ) : (
-                                        <Link to={`/dashboard/payment/${loan._id}`}>
-                                            <button className="btn btn-sm btn-primary text-white">
-                                                Pay Now
+                                        // Paid State
+                                        <div className="w-full space-y-3">
+                                            
+                                            {/* ✅ View Receipt Button */}
+                                            <button 
+                                                onClick={() => setSelectedReceipt(loan)}
+                                                className="btn btn-outline btn-success w-full font-bold gap-2"
+                                            >
+                                                <FaReceipt /> View Receipt
                                             </button>
-                                        </Link>
+
+                                            {/* Status Badge */}
+                                            <div className="flex justify-between items-center bg-gray-50 p-3 rounded-xl border">
+                                                <span className="text-sm font-bold text-gray-500">Status:</span>
+                                                {loan.status === 'approved' && <div className="badge badge-success text-white gap-1"><FaCheckCircle /> Approved</div>}
+                                                {loan.status === 'rejected' && <div className="badge badge-error text-white gap-1"><FaTimesCircle /> Rejected</div>}
+                                                {loan.status === 'pending' && <div className="badge badge-warning text-white gap-1"><FaHourglassHalf /> Pending</div>}
+                                            </div>
+                                        </div>
                                     )}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className="col-span-full text-center py-20 bg-white rounded-2xl shadow-sm">
+                        <p className="text-2xl font-bold text-gray-400">No applications found.</p>
+                        <Link to="/all-loans" className="btn btn-link mt-2">Apply for a Loan</Link>
+                    </div>
+                )}
             </div>
 
-            {loans.length === 0 && (
-                <div className="text-center mt-10 text-gray-500">
-                    <p>No loan applications found.</p>
-                </div>
-            )}
-
-            {/* --- 4. Payment Details Modal (Challenge Part) --- */}
-            {selectedPayment && (
-                <dialog className="modal modal-bottom sm:modal-middle" open>
-                    <div className="modal-box">
-                        <h3 className="font-bold text-lg text-success mb-4">Payment Successful! 🎉</h3>
+            {/* ✅ RECEIPT MODAL (এটি রিসিপ্ট দেখাবে) */}
+            {selectedReceipt && (
+                <dialog className="modal modal-bottom sm:modal-middle backdrop-blur-sm" open>
+                    <div className="modal-box bg-white p-0 rounded-none w-11/12 max-w-md border-t-8 border-success">
                         
-                        <div className="space-y-2">
-                            <p><strong>Transaction ID:</strong> <span className="text-gray-600">{selectedPayment.transactionId}</span></p>
-                            <p><strong>Loan ID:</strong> <span className="text-gray-600">{selectedPayment._id}</span></p>
-                            <p><strong>Amount Paid:</strong> <span className="text-gray-600">${selectedPayment.price || 10}</span></p>
-                            <p><strong>Email:</strong> <span className="text-gray-600">{selectedPayment.email}</span></p>
-                            <p><strong>Date:</strong> <span className="text-gray-600">{new Date(selectedPayment.date).toLocaleDateString()}</span></p>
+                        {/* Receipt Header */}
+                        <div className="bg-gray-100 p-6 text-center border-b border-dashed border-gray-300">
+                            <h3 className="font-bold text-2xl text-gray-800 uppercase tracking-widest">Payment Receipt</h3>
+                            <p className="text-sm text-gray-500 mt-1">LoanLink Financial Services</p>
+                            <div className="mt-4 badge badge-success text-white font-bold px-4 py-3">PAID SUCCESSFUL</div>
+                        </div>
+                        
+                        {/* Receipt Body */}
+                        <div className="p-6 space-y-3 font-mono text-sm">
+                            <div className="flex justify-between border-b border-dashed pb-2">
+                                <span className="text-gray-500">Transaction ID:</span>
+                                <span className="font-bold text-gray-800 break-all">{selectedReceipt.transactionId || "N/A"}</span>
+                            </div>
+                            <div className="flex justify-between border-b border-dashed pb-2">
+                                <span className="text-gray-500">Date:</span>
+                                <span className="font-bold text-gray-800">{new Date(selectedReceipt.appliedDate).toLocaleDateString()}</span>
+                            </div>
+                            <div className="flex justify-between border-b border-dashed pb-2">
+                                <span className="text-gray-500">Applicant:</span>
+                                <span className="font-bold text-gray-800">{selectedReceipt.applicantName}</span>
+                            </div>
+                            <div className="flex justify-between border-b border-dashed pb-2">
+                                <span className="text-gray-500">Loan Type:</span>
+                                <span className="font-bold text-gray-800 capitalize">{selectedReceipt.loanCategory} Loan</span>
+                            </div>
+                            <div className="flex justify-between pt-2">
+                                <span className="text-gray-800 font-bold text-lg">Total Paid:</span>
+                                <span className="text-success font-bold text-xl">$10.00</span>
+                            </div>
                         </div>
 
-                        <div className="modal-action">
+                        {/* Modal Action */}
+                        <div className="p-4 bg-gray-50 flex gap-3">
                             <button 
-                                onClick={() => setSelectedPayment(null)} 
-                                className="btn btn-primary"
+                                onClick={() => window.print()} 
+                                className="btn btn-neutral flex-1"
+                            >
+                                <FaPrint /> Print
+                            </button>
+                            <button 
+                                onClick={() => setSelectedReceipt(null)} 
+                                className="btn btn-primary flex-1"
                             >
                                 Close
                             </button>
                         </div>
                     </div>
-                    {/* Backdrop click to close */}
                     <form method="dialog" className="modal-backdrop">
-                        <button onClick={() => setSelectedPayment(null)}>close</button>
+                        <button onClick={() => setSelectedReceipt(null)}>close</button>
                     </form>
                 </dialog>
             )}
