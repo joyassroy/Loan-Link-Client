@@ -1,94 +1,196 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import useAuth from "../../hooks/useAuth";
-import Swal from "sweetalert2";
 import { useState } from "react";
+import { useLocation, useNavigate, Link } from "react-router-dom";
+import useAuth from "../../hooks/useAuth";
+import useAxiosPublic from "../../hooks/useAxiosPublic";
+import { FcGoogle } from "react-icons/fc";
+import { FaUserAlt, FaLock, FaShieldAlt, FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
+import Swal from "sweetalert2";
 
 const Login = () => {
-    const { register, handleSubmit, formState: { errors } } = useForm();
+    // --- AUTH LOGIC (UNCHANGED) ---
     const { signIn, googleSignIn } = useAuth();
+    const axiosPublic = useAxiosPublic();
     const navigate = useNavigate();
     const location = useLocation();
-
     const from = location.state?.from?.pathname || "/";
-    const [error, setError] = useState("");
 
-    const handleLogin = data => {
-        signIn(data.email, data.password)
+    // --- UI STATES ---
+    const [focusedField, setFocusedField] = useState(null); // 'email' or 'password'
+    const [loginStatus, setLoginStatus] = useState('idle'); // idle, loading, success, error
+
+    // Google Login Logic
+    const handleGoogleSignIn = () => {
+        setLoginStatus('loading');
+        googleSignIn()
             .then(result => {
-                const user = result.user;
-                console.log(user);
+                const userInfo = {
+                    email: result.user?.email,
+                    name: result.user?.displayName,
+                    role: 'borrower'
+                };
+                axiosPublic.post('/users', userInfo)
+                    .then(() => {
+                        setLoginStatus('success');
+                        Swal.fire("Welcome!", "Login Successful", "success");
+                        navigate(from, { replace: true });
+                    });
+            })
+            .catch(err => {
+                console.error(err);
+                triggerError();
+            });
+    };
+
+    // Email Login Logic
+    const handleLogin = (e) => {
+        e.preventDefault();
+        setLoginStatus('loading');
+        const form = e.target;
+        const email = form.email.value;
+        const password = form.password.value;
+
+        signIn(email, password)
+            .then(() => {
+                setLoginStatus('success');
                 Swal.fire({
-                    title: 'User Login Successful.',
-                    showClass: {
-                        popup: 'animate__animated animate__fadeInDown'
-                    },
-                    hideClass: {
-                        popup: 'animate__animated animate__fadeOutUp'
-                    }
+                    title: "Access Granted",
+                    icon: "success",
+                    timer: 1500,
+                    showConfirmButton: false
                 });
                 navigate(from, { replace: true });
             })
-            .catch(error => {
-                setError(error.message);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: error.message,
-                })
-            })
-    }
+            .catch(() => {
+                triggerError();
+            });
+    };
 
-    const handleGoogleSignIn = () =>{
-        googleSignIn()
-        .then(result =>{
-            console.log(result.user);
-            navigate(from, { replace: true });
-        })
-    }
+    // Error Handler (Shake Effect)
+    const triggerError = () => {
+        setLoginStatus('error');
+        setTimeout(() => setLoginStatus('idle'), 600); // 0.6s পর স্বাভাবিক হবে
+    };
 
     return (
-        <div className="hero min-h-screen bg-base-200">
-            <div className="hero-content flex-col md:flex-row-reverse">
-                <div className="text-center md:text-left">
-                    <h1 className="text-5xl font-bold">Login now!</h1>
-                    <p className="py-6">Access your loan dashboard securely.</p>
-                </div>
-                <div className="card md:w-1/2 max-w-sm shadow-2xl bg-base-100">
-                    <form onSubmit={handleSubmit(handleLogin)} className="card-body">
-                        <div className="form-control">
-                            <label className="label">
-                                <span className="label-text">Email</span>
-                            </label>
-                            <input type="email" {...register("email", { required: true })} name="email" placeholder="email" className="input input-bordered" />
-                            {errors.email && <span className="text-red-600">Email is required</span>}
-                        </div>
-                        <div className="form-control">
-                            <label className="label">
-                                <span className="label-text">Password</span>
-                            </label>
-                            <input type="password" {...register("password", { required: true })} name="password" placeholder="password" className="input input-bordered" />
-                            {errors.password && <span className="text-red-600">Password is required</span>}
-                            <label className="label">
-                                <a href="#" className="label-text-alt link link-hover">Forgot password?</a>
-                            </label>
-                        </div>
-                        
-                        {error && <p className="text-red-600 text-center">{error}</p>}
-                        
-                        <div className="form-control mt-6">
-                            <input className="btn btn-primary" type="submit" value="Login" />
-                        </div>
-                    </form>
-                    <div className="p-4 text-center">
-                        <div className="divider">OR</div>
-                        <button onClick={handleGoogleSignIn} className="btn btn-outline w-full uppercase">
-                           Google Sign In
-                        </button>
-                        <p className="mt-4"><small>New Here? <Link to="/register" className="text-primary font-bold">Create an account</Link></small></p>
+        <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4 relative overflow-hidden font-sans">
+            
+            {/* Background Effects */}
+            <div className="absolute top-[-20%] left-[-10%] w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-pulse"></div>
+            <div className="absolute bottom-[-20%] right-[-10%] w-96 h-96 bg-purple-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-pulse"></div>
+
+            <div className={`relative w-full max-w-md bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 shadow-2xl rounded-3xl p-8 transition-all duration-300 ${loginStatus === 'error' ? 'animate-shake border-red-500/50' : ''}`}>
+                
+                {/* --- 1. DYNAMIC SECURITY HEADER --- */}
+                <div className="flex flex-col items-center justify-center mb-8">
+                    <div className={`w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-4 transition-all duration-500 shadow-lg ${
+                        loginStatus === 'success' ? 'bg-green-500/20 text-green-400 ring-2 ring-green-500' :
+                        loginStatus === 'error' ? 'bg-red-500/20 text-red-400 ring-2 ring-red-500' :
+                        focusedField === 'password' ? 'bg-blue-600 text-white scale-110 ring-4 ring-blue-500/30' : 
+                        'bg-gray-700 text-gray-400'
+                    }`}>
+                        {loginStatus === 'success' ? <FaCheckCircle /> : 
+                         loginStatus === 'error' ? <FaExclamationCircle /> :
+                         focusedField === 'password' ? <FaLock className="animate-bounce-short" /> : 
+                         <FaShieldAlt />}
                     </div>
+                    
+                    <h2 className="text-3xl font-bold text-white tracking-tight">Welcome Back</h2>
+                    <p className="text-gray-400 text-sm mt-1">
+                        {focusedField === 'password' ? "Securing connection..." : "Sign in to access your dashboard"}
+                    </p>
                 </div>
+
+                {/* --- 2. LOGIN FORM --- */}
+                <form onSubmit={handleLogin} className="space-y-5">
+                    
+                    {/* Email Input */}
+                    <div className="group">
+                        <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2 ml-1">Email Address</label>
+                        <div className={`flex items-center bg-gray-900/50 border rounded-xl px-4 py-3 transition-all duration-300 ${focusedField === 'email' ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-gray-600'}`}>
+                            <FaUserAlt className={`mr-3 transition-colors ${focusedField === 'email' ? 'text-blue-500' : 'text-gray-500'}`} />
+                            <input 
+                                type="email" 
+                                name="email" 
+                                placeholder="name@example.com" 
+                                className="bg-transparent w-full text-white placeholder-gray-500 outline-none"
+                                onFocus={() => setFocusedField('email')}
+                                onBlur={() => setFocusedField(null)}
+                                required 
+                            />
+                        </div>
+                    </div>
+
+                    {/* Password Input (Triggers Lock Animation) */}
+                    <div className="group">
+                        <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2 ml-1">Password</label>
+                        <div className={`flex items-center bg-gray-900/50 border rounded-xl px-4 py-3 transition-all duration-300 ${
+                            loginStatus === 'error' ? 'border-red-500 ring-2 ring-red-500/20' :
+                            focusedField === 'password' ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-gray-600'
+                        }`}>
+                            <FaLock className={`mr-3 transition-colors ${
+                                loginStatus === 'error' ? 'text-red-500' :
+                                focusedField === 'password' ? 'text-blue-500' : 'text-gray-500'
+                            }`} />
+                            <input 
+                                type="password" 
+                                name="password" 
+                                placeholder="••••••••" 
+                                className="bg-transparent w-full text-white placeholder-gray-500 outline-none"
+                                onFocus={() => setFocusedField('password')}
+                                onBlur={() => setFocusedField(null)}
+                                required 
+                            />
+                        </div>
+                    </div>
+
+                    <button 
+                        disabled={loginStatus === 'loading'}
+                        className="btn w-full bg-blue-600 hover:bg-blue-700 text-white border-none rounded-xl text-lg font-bold shadow-lg shadow-blue-900/20 transition-all hover:scale-[1.02] mt-4"
+                    >
+                        {loginStatus === 'loading' ? <span className="loading loading-dots"></span> : 'Sign In'}
+                    </button>
+                </form>
+
+                {/* --- 3. SOCIAL & FOOTER --- */}
+                <div className="mt-8">
+                    <div className="relative flex py-2 items-center">
+                        <div className="flex-grow border-t border-gray-600"></div>
+                        <span className="flex-shrink mx-4 text-gray-500 text-xs uppercase">Or continue with</span>
+                        <div className="flex-grow border-t border-gray-600"></div>
+                    </div>
+
+                    <button 
+                        onClick={handleGoogleSignIn} 
+                        className="btn w-full bg-white hover:bg-gray-100 text-gray-800 border-none rounded-xl mt-4 flex items-center justify-center gap-2 font-bold"
+                    >
+                        <FcGoogle className="text-xl" /> Google
+                    </button>
+
+                    <p className="text-center text-gray-400 mt-6 text-sm">
+                        Don't have an account? <Link to="/register" className="text-blue-400 hover:text-blue-300 font-bold hover:underline">Register</Link>
+                    </p>
+                </div>
+
             </div>
+
+            {/* CSS Animation for Shake & Bounce */}
+            <style>{`
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    25% { transform: translateX(-8px); }
+                    75% { transform: translateX(8px); }
+                }
+                .animate-shake {
+                    animation: shake 0.4s ease-in-out;
+                }
+                @keyframes bounceShort {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-5px); }
+                }
+                .animate-bounce-short {
+                    animation: bounceShort 0.5s ease-in-out infinite;
+                }
+            `}</style>
         </div>
     );
 };
