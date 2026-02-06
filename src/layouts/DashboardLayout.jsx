@@ -143,7 +143,7 @@ const DashboardLayout = () => {
                             {isBorrower && <>
                                 <li className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 mt-2 pl-2">Borrower</li>
                                 <li><NavLink to="/dashboard/my-loans" className={navLinkClass}><FaWallet /> My Loans</NavLink></li>
-                                <li><NavLink to="/dashboard/apply-loan" className={navLinkClass}><FaMoneyBillWave /> Apply Loan</NavLink></li>
+                                
                             </>}
 
                             <div className="divider my-4"></div>
