@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "../../hooks/useAuth";
 import useAxiosPublic from "../../hooks/useAxiosPublic"; 
 import Swal from "sweetalert2";
+import Confetti from "react-confetti"; // 🎉 Import Confetti
 import { FaPaperPlane, FaMoneyBillWave, FaDollarSign, FaUser, FaPhone, FaMapMarkerAlt } from "react-icons/fa";
 
 const LoanApplication = () => {
@@ -10,6 +12,11 @@ const LoanApplication = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const axiosPublic = useAxiosPublic();
+    
+    // 🎉 Confetti State
+    const [showConfetti, setShowConfetti] = useState(false);
+    // Window dimensions for full screen confetti
+    const [windowDimension] = useState({ width: window.innerWidth, height: window.innerHeight });
 
     // 1. Fetch Loan Details
     const { data: loan = {}, isLoading } = useQuery({
@@ -24,11 +31,14 @@ const LoanApplication = () => {
     const handleApply = async (e) => {
         e.preventDefault();
         const form = e.target;
+        
         const phone = form.phone.value;
         const address = form.address.value;
-        const amount = parseFloat(form.amount.value);
+        const amount = parseFloat(form.amount.value); 
+        
         const maxLimit = parseFloat(loan.maxLoanLimit || loan.maxLimit);
 
+        // Validation
         if (amount > maxLimit) {
             Swal.fire({
                 title: "Limit Exceeded!",
@@ -38,42 +48,65 @@ const LoanApplication = () => {
             return;
         }
 
-        // 🔥 ডাটাবেস এন্ট্রি ঠিক করার জন্য এই নামগুলো চেঞ্জ করা হলো
         const applicationData = {
             loanId: id,
             loanTitle: loan.title,
             loanCategory: loan.category,
-            
-            applicantName: user?.displayName, // আগে ছিল borrowerName
-            email: user?.email,               // আগে ছিল borrowerEmail
-            
+            applicantName: user?.displayName,
+            email: user?.email, // Changed to 'email' as per previous fix
             phone,
             address,
-            loanAmount: amount,               // আগে ছিল amount
-            
+            loanAmount: amount, // Changed to 'loanAmount' as per previous fix
             status: 'pending',
-            paymentStatus: 'unpaid',          // ডিফল্ট ভ্যালু
+            paymentStatus: 'unpaid',
             appliedDate: new Date().toISOString()
         };
 
         try {
             const res = await axiosPublic.post('/applications', applicationData);
             if (res.data.insertedId) {
-                Swal.fire("Success", "Application Submitted!", "success");
-                navigate('/dashboard/my-loans');
+                
+                // 🎉 1. Start Confetti
+                setShowConfetti(true);
+
+                // 🎉 2. Show Success Message with slight delay so user sees confetti
+                setTimeout(() => {
+                    Swal.fire({
+                        title: "Application Sent!",
+                        text: `Your application for $${amount} has been submitted successfully.`,
+                        icon: "success",
+                        timer: 3000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        // 🎉 3. Stop Confetti & Navigate
+                        setShowConfetti(false);
+                        navigate('/dashboard/my-loans');
+                    });
+                }, 1000); // 1 সেকেন্ড কনফেটি দেখার সুযোগ পাবে
             }
         } catch (error) {
             Swal.fire("Error", error.message, "error");
         }
     };
 
-        
-
     if (isLoading) return <div className="flex justify-center h-screen items-center"><span className="loading loading-bars loading-lg text-primary"></span></div>;
 
     return (
-        <div className="min-h-screen bg-base-200 flex items-center justify-center py-10 px-4 font-sans">
-            <div className="card w-full max-w-3xl bg-white shadow-2xl rounded-3xl overflow-hidden">
+        <div className="min-h-screen bg-base-200 flex items-center justify-center py-10 px-4 font-sans relative overflow-hidden">
+            
+            {/* 🎉 Confetti Component (Conditional Render) */}
+            {showConfetti && (
+                <div className="fixed inset-0 z-50 pointer-events-none">
+                    <Confetti 
+                        width={windowDimension.width} 
+                        height={windowDimension.height} 
+                        numberOfPieces={300}
+                        recycle={false} // একবার পড়েই শেষ হবে
+                    />
+                </div>
+            )}
+
+            <div className="card w-full max-w-3xl bg-white shadow-2xl rounded-3xl overflow-hidden z-10">
                 
                 {/* Header Section */}
                 <div className="bg-gradient-to-r from-blue-700 to-blue-500 p-8 text-white text-center">
@@ -111,7 +144,7 @@ const LoanApplication = () => {
 
                     <div className="divider text-gray-400 text-sm font-semibold">Fill Required Info</div>
 
-                    {/* ✅ LOAN AMOUNT INPUT (Highlighted) */}
+                    {/* Loan Amount Input */}
                     <div className="form-control">
                         <label className="label font-bold text-gray-700 text-base">
                             Loan Amount (USD) <span className="text-red-500">*</span>
@@ -129,11 +162,6 @@ const LoanApplication = () => {
                                 required 
                             />
                         </div>
-                        <label className="label">
-                            <span className="label-text-alt text-gray-500">
-                                Enter the amount you need. Cannot exceed the max limit.
-                            </span>
-                        </label>
                     </div>
 
                     {/* Phone Input */}
