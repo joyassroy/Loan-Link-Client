@@ -5,52 +5,61 @@ import useAuth from "../../../hooks/useAuth";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 
-const CheckoutForm = ({ applicationId }) => {
-    const [error, setError] = useState('');
-    const [clientSecret, setClientSecret] = useState('');
-    const [processing, setProcessing] = useState(false);
-
+const CheckoutForm = ({ application, price }) => {
     const stripe = useStripe();
     const elements = useElements();
     const axiosSecure = useAxiosSecure();
     const { user } = useAuth();
     const navigate = useNavigate();
+    
+    const [clientSecret, setClientSecret] = useState('');
+    const [error, setError] = useState('');
+    const [transactionId, setTransactionId] = useState('');
+    const [processing, setProcessing] = useState(false);
 
-    const price = 10; // Fixed Challenge Requirement
-
+    // 1. Create Payment Intent (Load Client Secret)
     useEffect(() => {
-        // Create Payment Intent on mount
-        axiosSecure.post('/create-payment-intent', { price })
-            .then(res => {
-                console.log(res.data.clientSecret);
-                setClientSecret(res.data.clientSecret);
-            })
-            .catch(err => console.error("Payment intent error:", err));
+        if (price > 0) {
+            axiosSecure.post('/create-payment-intent', { price: price })
+                .then(res => {
+                    console.log("Client Secret Recieved");
+                    setClientSecret(res.data.clientSecret);
+                })
+                .catch(err => console.error("Stripe Intent Error:", err));
+        }
     }, [axiosSecure, price]);
 
+    // 2. Handle Payment Submission
     const handleSubmit = async (event) => {
         event.preventDefault();
 
+        // Safety Checks
         if (!stripe || !elements) return;
-
+        
         const card = elements.getElement(CardElement);
         if (card === null) return;
 
-        // 1. Create Payment Method
-        const { error, paymentMethod } = await stripe.createPaymentMethod({
+        if (!application?._id) {
+            setError("Error: Application ID is missing. Cannot proceed.");
+            return;
+        }
+
+        setProcessing(true);
+        setError('');
+
+        // Step A: Create Payment Method
+        const { error: paymentMethodError } = await stripe.createPaymentMethod({
             type: 'card',
             card
         });
 
-        if (error) {
-            setError(error.message);
-        } else {
-            setError('');
+        if (paymentMethodError) {
+            setError(paymentMethodError.message);
+            setProcessing(false);
+            return;
         }
 
-        setProcessing(true);
-
-        // 2. Confirm Payment
+        // Step B: Confirm Payment
         const { paymentIntent, error: confirmError } = await stripe.confirmCardPayment(clientSecret, {
             payment_method: {
                 card: card,
@@ -62,64 +71,82 @@ const CheckoutForm = ({ applicationId }) => {
         });
 
         if (confirmError) {
-            console.log(confirmError);
+            console.log("Confirm Error:", confirmError);
             setError(confirmError.message);
             setProcessing(false);
         } else {
-            console.log('payment intent', paymentIntent);
+            console.log("Payment Intent Success:", paymentIntent);
+            
             if (paymentIntent.status === 'succeeded') {
-                
-                // 3. Save to Database
+                setTransactionId(paymentIntent.id);
+
+                // Step C: Update Database
                 const paymentInfo = {
                     transactionId: paymentIntent.id,
-                    price: price,
-                    date: new Date()
-                }
+                    date: new Date(), // Convert to UTC string if needed
+                    amount: price,
+                    status: 'paid'
+                };
 
-                const res = await axiosSecure.patch(`/applications/payment/${applicationId}`, paymentInfo);
-                
-                setProcessing(false);
-                
-                if (res.data.modifiedCount > 0) {
-                    Swal.fire({
-                        title: 'Payment Successful!',
-                        text: `Transaction ID: ${paymentIntent.id}`,
-                        icon: 'success',
-                        confirmButtonText: 'Go to My Loans'
-                    }).then((result) => {
-                         if(result.isConfirmed){
-                             navigate('/dashboard/my-loans');
-                         }
-                    });
+                try {
+                    // Update the specific application
+                    const res = await axiosSecure.patch(`/applications/payment/${application._id}`, paymentInfo);
+                    
+                    if (res.data.modifiedCount > 0) {
+                        Swal.fire({
+                            title: "Payment Successful!",
+                            text: `Transaction ID: ${paymentIntent.id}`,
+                            icon: "success",
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        // Navigate back to user dashboard
+                        navigate('/dashboard/my-loans');
+                    }
+                } catch (dbError) {
+                    console.error("Database Update Failed:", dbError);
+                    setError("Payment successful but failed to update database. Please contact support.");
                 }
             }
+            setProcessing(false);
         }
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <div className="border p-4 rounded-md border-gray-300 mb-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="border border-gray-300 p-4 rounded-lg bg-white shadow-sm">
                 <CardElement
                     options={{
                         style: {
                             base: {
                                 fontSize: '16px',
                                 color: '#424770',
-                                '::placeholder': { color: '#aab7c4' },
+                                fontFamily: 'sans-serif',
+                                '::placeholder': {
+                                    color: '#aab7c4',
+                                },
                             },
-                            invalid: { color: '#9e2146' },
+                            invalid: {
+                                color: '#ef4444', // Tailwind Red-500
+                            },
                         },
                     }}
                 />
             </div>
             
-            {error && <p className="text-red-600 mb-4 text-sm">{error}</p>}
+            {/* Error Message */}
+            {error && <p className="text-red-500 text-sm font-semibold mt-2">{error}</p>}
+            
+            {/* Transaction Success Message */}
+            {transactionId && <p className="text-green-600 text-sm">Transaction ID: {transactionId}</p>}
 
+            {/* Pay Button */}
             <button 
-                className="btn btn-primary w-full bg-emerald-600 border-none" 
+                className={`btn btn-primary w-full text-white text-lg ${processing ? 'loading' : ''}`} 
                 type="submit" 
-                disabled={!stripe || !clientSecret || processing}>
-                {processing ? <span className="loading loading-spinner"></span> : `Pay $${price}`}
+                disabled={!stripe || !clientSecret || processing}
+            >
+                {processing ? "Processing..." : `Pay $${price}`}
             </button>
         </form>
     );

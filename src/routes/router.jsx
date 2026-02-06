@@ -7,7 +7,7 @@ import Home from "../pages/Home/Home";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 import AllLoans from "../pages/AllLoans/AllLoans";
-import LoanDetails from "../pages/LoanDetails/LoanDetails";
+//import LoanDetails from "../pages/LoanDetails/LoanDetails";
 import ErrorPage from "../pages/ErrorPage/ErrorPage";
 import Contact from "../pages/Contact/Contact"; 
 import About from "../pages/About/About";  
@@ -17,7 +17,7 @@ import Payment from "../pages/Dashboard/Borrower/Payment";
 // Private Dashboard Pages
 import PrivateRoute from "./PrivateRoute";
 import AdminRoute from "./AdminRoute"; // Import the file you just made
-
+import LoanDetails from "../pages/AllLoans/LoanDetails";
 // Common
 import Profile from "../pages/Dashboard/Profile";
 
@@ -30,6 +30,7 @@ import ManageLoans from "../pages/Dashboard/Manager/ManageLoans";
 import PendingLoans from "../pages/Dashboard/Manager/PendingLoans";
 import LoanApplications from "../pages/Dashboard/Admin/LoanApplications";
 import ApprovedLoans from "../pages/Dashboard/Manager/ApprovedLoans";
+import LoanApplication from "../pages/AllLoans/LoanApplication";
 // Borrower
 //import MyLoans from "../pages/Dashboard/Borrower/MyLoans";
 
@@ -51,8 +52,13 @@ const router = createBrowserRouter([
       { path: "contact", element: <Contact /> },
       { path: "about", element: <About /> },
       {
-        path: "loan/:id",
-        element: <PrivateRoute><LoanDetails /></PrivateRoute>, // Private because of "Apply" button check
+        path: "loans/:id", 
+        element: <PrivateRoute><LoanDetails></LoanDetails></PrivateRoute> 
+        // নোট: যদি চাও লগইন ছাড়াও দেখবে, তাহলে <PrivateRoute> সরিয়ে শুধু <LoanDetails /> দাও
+      },
+      {
+        path: "application/:id",
+        element: <PrivateRoute><LoanApplication></LoanApplication></PrivateRoute>
       },
       {
         path: "login",
@@ -74,7 +80,7 @@ const router = createBrowserRouter([
         element: <Profile />,
       },
       {
-          path: "payment/:applicationId",
+          path: "payment/:id",
           element: <Payment />,
       },
 
