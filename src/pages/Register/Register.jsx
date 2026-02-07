@@ -51,9 +51,19 @@ const Register = () => {
         const email = form.email.value;
         const password = form.password.value;
 
-        // Password Validation
+        // ✅ PASSWORD VALIDATION LOGIC (UPDATED)
         if (password.length < 6) {
-            setPasswordError("Password must be at least 6 characters");
+            setPasswordError("Password must be at least 6 characters long.");
+            triggerError();
+            return;
+        }
+        if (!/[A-Z]/.test(password)) {
+            setPasswordError("Password must contain at least one uppercase letter (A-Z).");
+            triggerError();
+            return;
+        }
+        if (!/[a-z]/.test(password)) {
+            setPasswordError("Password must contain at least one lowercase letter (a-z).");
             triggerError();
             return;
         }
@@ -88,7 +98,7 @@ const Register = () => {
             })
             .catch(error => {
                 console.error(error);
-                triggerError("Email already in use or invalid.");
+                triggerError("Email already in use.");
             });
     };
 
@@ -102,13 +112,13 @@ const Register = () => {
     return (
         <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4 relative overflow-hidden font-sans">
             
-            {/* Background Effects (Same as Login) */}
+            {/* Background Effects */}
             <div className="absolute top-[-20%] right-[-10%] w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-pulse"></div>
             <div className="absolute bottom-[-20%] left-[-10%] w-96 h-96 bg-purple-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-pulse"></div>
 
             <div className={`relative w-full max-w-lg bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 shadow-2xl rounded-3xl p-8 transition-all duration-300 ${regStatus === 'error' ? 'animate-shake border-red-500/50' : ''}`}>
                 
-                {/* --- 1. DYNAMIC HEADER ICON --- */}
+                {/* --- HEADER ICON --- */}
                 <div className="flex flex-col items-center justify-center mb-6">
                     <div className={`w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-4 transition-all duration-500 shadow-lg ${
                         regStatus === 'success' ? 'bg-green-500/20 text-green-400 ring-2 ring-green-500' :
@@ -128,7 +138,7 @@ const Register = () => {
                     <p className="text-gray-400 text-sm mt-1">Join our secure financial platform</p>
                 </div>
 
-                {/* --- 2. REGISTRATION FORM --- */}
+                {/* --- REGISTRATION FORM --- */}
                 <form onSubmit={handleRegister} className="space-y-4">
                     
                     {/* Name Field */}
@@ -184,7 +194,7 @@ const Register = () => {
                                 onFocus={() => setFocusedField('password')} onBlur={() => setFocusedField(null)} required 
                             />
                         </div>
-                        {passwordError && <p className="text-red-500 text-xs mt-1 ml-1">{passwordError}</p>}
+                        {passwordError && <p className="text-red-500 text-xs mt-1 ml-1 font-semibold animate-pulse">{passwordError}</p>}
                     </div>
 
                     <button 
@@ -195,7 +205,7 @@ const Register = () => {
                     </button>
                 </form>
 
-                {/* --- 3. SOCIAL & FOOTER --- */}
+                {/* --- SOCIAL & FOOTER --- */}
                 <div className="mt-6">
                     <div className="relative flex py-2 items-center">
                         <div className="flex-grow border-t border-gray-600"></div>
