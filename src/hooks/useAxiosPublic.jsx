@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosPublic = axios.create({
-    baseURL: 'http://localhost:5013', // Make sure this matches your server port
+    baseURL: 'https://loan-link-server-teal.vercel.app', // Make sure this matches your server port
     withCredentials: true
 });
 

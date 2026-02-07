@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import useAuth from "./useAuth";
 
 const axiosSecure = axios.create({
-    baseURL: 'http://localhost:5013', // Update this when deploying!
+    baseURL: 'https://loan-link-server-teal.vercel.app', // Update this when deploying!
     withCredentials: true
 });
 
