@@ -35,9 +35,11 @@ const Home = () => {
     };
 
     return (
-        <div className="font-sans text-gray-800 overflow-x-hidden">
+        // ✅ FIX: Added text-base-content and transition-colors for smooth theme switching
+        <div className="font-sans text-base-content overflow-x-hidden transition-colors duration-300">
 
-            {/* --- SECTION 1: HERO BANNER (Fixed Buttons) --- */}
+            {/* --- SECTION 1: HERO BANNER (Fixed Theme) --- */}
+            {/* Hero Section stays dark visually because of the gradient, which looks premium in both modes */}
             <div className="relative bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 text-white min-h-[85vh] flex items-center overflow-hidden">
                 
                 {/* Background Shapes */}
@@ -76,7 +78,6 @@ const Home = () => {
                             Experience the hassle-free way to get funded. Low interest rates, instant approval, and zero hidden fees.
                         </motion.p>
                         
-                        {/* ✅ FIX: Buttons Container */}
                         <motion.div variants={fadeInUp} className="flex flex-wrap gap-4 pt-4">
                             <Link to="/all-loans">
                                 <button className="btn btn-primary btn-lg rounded-full px-8 shadow-lg shadow-blue-500/30 hover:scale-105 transition-transform border-none bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold h-14 min-w-[180px]">
@@ -84,7 +85,6 @@ const Home = () => {
                                 </button>
                             </Link>
                             
-                            {/* Added Secondary Button for Balance */}
                             <Link to="/about">
                                 <button className="btn btn-outline text-white btn-lg rounded-full px-8 hover:bg-white hover:text-gray-900 hover:scale-105 transition-transform font-bold h-14 min-w-[160px]">
                                     Learn More <FaInfoCircle />
@@ -110,33 +110,33 @@ const Home = () => {
                 </div>
             </div>
 
-            {/* --- SECTION 2: STATS (Perfectly Centered) --- */}
-            <div className="relative z-20 container mx-auto px-4 -mt-17">
+            {/* --- SECTION 2: STATS --- */}
+            <div className="relative z-20 container mx-auto px-4 -mt-16">
                 <motion.div 
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6, delay: 0.2 }}
-                    className="bg-white rounded-2xl shadow-xl shadow-blue-900/5 py-8 px-6 md:px-12 border border-gray-100 grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100 items-center max-w-6xl mx-auto"
+                    // ✅ FIX: bg-base-100, divide-base-300, border-base-300
+                    className="bg-base-100 rounded-2xl shadow-xl shadow-blue-900/5 py-8 px-6 md:px-12 border border-base-300 grid grid-cols-2 md:grid-cols-4 divide-x divide-base-300 items-center max-w-6xl mx-auto transition-colors duration-300"
                 >
                     {[
-                        { icon: <FaUserCheck />, count: "15K+", label: "Happy Users", color: "text-blue-600" },
-                        { icon: <FaMoneyBillWave />, count: "$12M+", label: "Disbursed", color: "text-green-600" },
-                        { icon: <FaHandHoldingUsd />, count: "99%", label: "Approval", color: "text-purple-600" },
-                        { icon: <FaCheckCircle />, count: "24/7", label: "Support", color: "text-orange-600" },
+                        { icon: <FaUserCheck />, count: "15K+", label: "Happy Users", color: "text-blue-500" },
+                        { icon: <FaMoneyBillWave />, count: "$12M+", label: "Disbursed", color: "text-green-500" },
+                        { icon: <FaHandHoldingUsd />, count: "99%", label: "Approval", color: "text-purple-500" },
+                        { icon: <FaCheckCircle />, count: "24/7", label: "Support", color: "text-orange-500" },
                     ].map((stat, idx) => (
                         <div key={idx} className="flex flex-col items-center justify-center gap-2 group p-4">
-                            {/* Icon with Hover Bounce */}
                             <div className={`text-4xl ${stat.color} group-hover:-translate-y-2 transition-transform duration-300 drop-shadow-sm`}>
                                 {stat.icon}
                             </div>
                             
-                            {/* Text Content */}
                             <div className="text-center">
-                                <h3 className="text-3xl font-extrabold text-gray-800 leading-tight">
+                                {/* ✅ FIX: text-base-content */}
+                                <h3 className="text-3xl font-extrabold text-base-content leading-tight">
                                     {stat.count}
                                 </h3>
-                                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-1 group-hover:text-blue-600 transition-colors">
+                                <p className="text-[11px] font-bold text-base-content/60 uppercase tracking-widest mt-1 group-hover:text-primary transition-colors">
                                     {stat.label}
                                 </p>
                             </div>
@@ -144,18 +144,19 @@ const Home = () => {
                     ))}
                 </motion.div>
             </div>
+
             {/* --- SECTION 3: AVAILABLE LOANS --- */}
             <div className="container mx-auto px-6 py-24">
                 <div className="text-center max-w-3xl mx-auto mb-16">
                     <motion.span 
                         initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} 
-                        className="text-blue-600 font-bold uppercase tracking-wider text-sm"
+                        className="text-primary font-bold uppercase tracking-wider text-sm"
                     >
                         Our Packages
                     </motion.span>
                     <motion.h2 
                         initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} 
-                        className="text-3xl md:text-4xl font-extrabold text-gray-900 mt-2"
+                        className="text-3xl md:text-4xl font-extrabold text-base-content mt-2"
                     >
                         Find the Perfect Loan
                     </motion.h2>
@@ -176,34 +177,36 @@ const Home = () => {
                                 key={loan._id} 
                                 variants={fadeInUp}
                                 whileHover={{ y: -10 }}
-                                className="card bg-white shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 rounded-3xl overflow-hidden group h-full flex flex-col"
+                                // ✅ FIX: bg-base-100, border-base-300
+                                className="card bg-base-100 shadow-lg hover:shadow-2xl transition-all duration-300 border border-base-300 rounded-3xl overflow-hidden group h-full flex flex-col"
                             >
                                 <figure className="relative h-56 overflow-hidden flex-shrink-0">
                                     <img src={loan.image} alt={loan.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold uppercase text-gray-800 shadow-sm">
+                                    {/* ✅ FIX: bg-base-100/90, text-base-content */}
+                                    <div className="absolute top-4 right-4 bg-base-100/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold uppercase text-base-content shadow-sm">
                                         {loan.category}
                                     </div>
                                 </figure>
                                 
                                 <div className="card-body p-6 flex-grow flex flex-col">
-                                    <h3 className="text-2xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{loan.title}</h3>
-                                    <p className="text-gray-500 text-sm mt-2 line-clamp-2 flex-grow">{loan.description}</p>
+                                    <h3 className="text-2xl font-bold text-base-content group-hover:text-primary transition-colors">{loan.title}</h3>
+                                    <p className="text-base-content/70 text-sm mt-2 line-clamp-2 flex-grow">{loan.description}</p>
                                     
-                                    <div className="mt-4 p-4 bg-gray-50 rounded-2xl flex justify-between items-center">
+                                    {/* ✅ FIX: bg-base-200 */}
+                                    <div className="mt-4 p-4 bg-base-200 rounded-2xl flex justify-between items-center transition-colors">
                                         <div>
-                                            <p className="text-xs text-gray-400 font-bold uppercase">Max Limit</p>
-                                            <p className="text-lg font-extrabold text-blue-600">${loan.maxLoanLimit || loan.maxLimit}</p>
+                                            <p className="text-xs text-base-content/60 font-bold uppercase">Max Limit</p>
+                                            <p className="text-lg font-extrabold text-primary">${loan.maxLoanLimit || loan.maxLimit}</p>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-xs text-gray-400 font-bold uppercase">Interest</p>
-                                            <p className="text-lg font-extrabold text-gray-800">{loan.interest || loan.interestRate}%</p>
+                                            <p className="text-xs text-base-content/60 font-bold uppercase">Interest</p>
+                                            <p className="text-lg font-extrabold text-base-content">{loan.interest || loan.interestRate}%</p>
                                         </div>
                                     </div>
 
-                                    {/* ✅ FIX: Button Spacing in Card */}
                                     <div className="mt-6">
                                         <Link to={`/loans/${loan._id}`} className="block w-full">
-                                            <button className="btn btn-outline btn-primary w-full rounded-xl hover:bg-blue-600 hover:text-white font-bold border-2 h-12">
+                                            <button className="btn btn-outline btn-primary w-full rounded-xl hover:bg-primary hover:text-white font-bold border-2 h-12">
                                                 View Details
                                             </button>
                                         </Link>
@@ -216,21 +219,22 @@ const Home = () => {
             </div>
 
             {/* --- SECTION 4: HOW IT WORKS --- */}
-            <div className="bg-gray-50 py-24 relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/graphy.png')] opacity-5"></div>
+            {/* ✅ FIX: bg-base-200 */}
+            <div className="bg-base-200 py-24 relative overflow-hidden transition-colors duration-300">
+                <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/graphy.png')] opacity-5 dark:invert"></div>
                 <div className="container mx-auto px-6 relative z-10">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">How It Works</h2>
-                        <p className="text-gray-500 mt-3">Get funded in 3 simple steps.</p>
+                        <h2 className="text-3xl md:text-4xl font-extrabold text-base-content">How It Works</h2>
+                        <p className="text-base-content/70 mt-3">Get funded in 3 simple steps.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-                        <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-1 bg-gradient-to-r from-blue-200 via-purple-200 to-green-200 -z-0 rounded-full"></div>
+                        <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-1 bg-gradient-to-r from-blue-200 via-purple-200 to-green-200 -z-0 rounded-full opacity-50"></div>
                         
                         {[
-                            { step: "01", title: "Apply Online", desc: "Fill out our secure application form in minutes.", color: "border-blue-500 text-blue-600" },
-                            { step: "02", title: "Get Verified", desc: "Our system verifies your details instantly.", color: "border-purple-500 text-purple-600" },
-                            { step: "03", title: "Receive Funds", desc: "Money sent directly to your bank account.", color: "border-green-500 text-green-600" }
+                            { step: "01", title: "Apply Online", desc: "Fill out our secure application form in minutes.", color: "border-blue-500 text-blue-500" },
+                            { step: "02", title: "Get Verified", desc: "Our system verifies your details instantly.", color: "border-purple-500 text-purple-500" },
+                            { step: "03", title: "Receive Funds", desc: "Money sent directly to your bank account.", color: "border-green-500 text-green-500" }
                         ].map((item, idx) => (
                             <motion.div 
                                 key={idx}
@@ -238,13 +242,14 @@ const Home = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 transition={{ delay: idx * 0.2 }}
                                 viewport={{ once: true }}
-                                className="text-center relative z-10 bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-shadow border border-gray-100"
+                                // ✅ FIX: bg-base-100, border-base-300
+                                className="text-center relative z-10 bg-base-100 p-8 rounded-3xl shadow-sm hover:shadow-xl transition-shadow border border-base-300"
                             >
-                                <div className={`w-20 h-20 bg-white border-4 ${item.color} rounded-full flex items-center justify-center mx-auto shadow-lg mb-6 text-2xl font-extrabold`}>
+                                <div className={`w-20 h-20 bg-base-100 border-4 ${item.color} rounded-full flex items-center justify-center mx-auto shadow-lg mb-6 text-2xl font-extrabold`}>
                                     {item.step}
                                 </div>
-                                <h3 className="text-xl font-bold text-gray-800">{item.title}</h3>
-                                <p className="text-gray-500 mt-2">{item.desc}</p>
+                                <h3 className="text-xl font-bold text-base-content">{item.title}</h3>
+                                <p className="text-base-content/70 mt-2">{item.desc}</p>
                             </motion.div>
                         ))}
                     </div>
@@ -254,7 +259,7 @@ const Home = () => {
             {/* --- SECTION 5: CUSTOMER FEEDBACK --- */}
             <div className="container mx-auto px-6 py-24">
                 <div className="text-center mb-16">
-                    <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">What Our Clients Say</h2>
+                    <h2 className="text-3xl md:text-4xl font-extrabold text-base-content">What Our Clients Say</h2>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -266,10 +271,11 @@ const Home = () => {
                         <motion.div 
                             key={idx}
                             whileHover={{ scale: 1.03 }}
-                            className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 relative"
+                            // ✅ FIX: bg-base-100, border-base-300
+                            className="bg-base-100 p-8 rounded-3xl shadow-lg border border-base-300 relative"
                         >
-                            <FaQuoteLeft className="text-4xl text-blue-100 absolute top-6 left-6" />
-                            <p className="text-gray-600 italic mt-8 relative z-10 min-h-[80px]">"{review.review}"</p>
+                            <FaQuoteLeft className="text-4xl text-primary/20 absolute top-6 left-6" />
+                            <p className="text-base-content/80 italic mt-8 relative z-10 min-h-[80px]">"{review.review}"</p>
                             <div className="flex items-center gap-1 text-yellow-400 mt-4">
                                 {[...Array(5)].map((_, i) => <FaRegStar key={i} fill="currentColor" />)}
                             </div>
@@ -280,8 +286,8 @@ const Home = () => {
                                     </div>
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-gray-800">{review.name}</h4>
-                                    <p className="text-xs text-gray-500">{review.role}</p>
+                                    <h4 className="font-bold text-base-content">{review.name}</h4>
+                                    <p className="text-xs text-base-content/60">{review.role}</p>
                                 </div>
                             </div>
                         </motion.div>
@@ -290,11 +296,12 @@ const Home = () => {
             </div>
 
             {/* --- SECTION 6: WHY CHOOSE US --- */}
-            <div className="bg-gray-900 text-white py-24">
+            {/* ✅ FIX: bg-neutral text-neutral-content keeps this section cleanly separated regardless of mode */}
+            <div className="bg-neutral text-neutral-content py-24 transition-colors duration-300">
                 <div className="container mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
                     <div className="md:w-1/2">
-                        <h2 className="text-3xl md:text-4xl font-extrabold mb-6">Why Choose <span className="text-blue-400">LoanLink?</span></h2>
-                        <p className="text-gray-400 mb-8 text-lg">We combine technology with trust to bring you the best financial services.</p>
+                        <h2 className="text-3xl md:text-4xl font-extrabold mb-6">Why Choose <span className="text-primary">LoanLink?</span></h2>
+                        <p className="text-neutral-content/70 mb-8 text-lg">We combine technology with trust to bring you the best financial services.</p>
                         <div className="space-y-4">
                             {["Lowest Interest Rates in the Market", "100% Online Paperless Process", "Instant Disbursement to Bank", "No Pre-payment Penalties"].map((item, i) => (
                                 <motion.div 
@@ -304,22 +311,22 @@ const Home = () => {
                                     transition={{ delay: i * 0.1 }}
                                     className="flex items-center gap-3"
                                 >
-                                    <FaCheckCircle className="text-green-400 flex-shrink-0" />
+                                    <FaCheckCircle className="text-success flex-shrink-0" />
                                     <span className="font-medium">{item}</span>
                                 </motion.div>
                             ))}
                         </div>
                         <Link to="/all-loans">
-                            <button className="btn btn-warning mt-8 rounded-full px-8 font-bold h-12 shadow-lg hover:shadow-yellow-400/20">Get Started Now</button>
+                            <button className="btn btn-primary mt-8 rounded-full px-8 font-bold h-12 shadow-lg hover:shadow-primary/30">Get Started Now</button>
                         </Link>
                     </div>
                     <div className="md:w-1/2">
                          <div className="relative">
-                            <div className="absolute inset-0 bg-blue-500 rounded-full blur-[100px] opacity-20"></div>
+                            <div className="absolute inset-0 bg-primary rounded-full blur-[100px] opacity-20"></div>
                             <img 
                                 src="https://img.freepik.com/free-vector/investment-data-concept-illustration_114360-5159.jpg" 
                                 alt="Why Choose Us" 
-                                className="relative rounded-3xl shadow-2xl border-4 border-gray-700 w-full"
+                                className="relative rounded-3xl shadow-2xl border-4 border-neutral-content/10 w-full"
                             />
                          </div>
                     </div>

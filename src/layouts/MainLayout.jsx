@@ -4,7 +4,7 @@ import Footer from "../pages/Shared/Footer"; // You need to create this
 
 const MainLayout = () => {
     return (
-        <div>
+        <div className="bg-base-100 text-base-content min-h-screen">
             <Navbar />
             <div className="min-h-screen">
                 {/* This is where Home, AllLoans, Login content will appear */}
