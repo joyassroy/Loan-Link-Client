@@ -93,12 +93,18 @@ const CheckoutForm = ({ application, price }) => {
                     const res = await axiosSecure.patch(`/applications/payment/${application._id}`, paymentInfo);
                     
                     if (res.data.modifiedCount > 0) {
+                        // ✅ FIX: SweetAlert background & color fix for Dark Mode
                         Swal.fire({
                             title: "Payment Successful!",
                             text: `Transaction ID: ${paymentIntent.id}`,
                             icon: "success",
                             timer: 2000,
-                            showConfirmButton: false
+                            showConfirmButton: false,
+                            background: "inherit",
+                            color: "inherit",
+                            customClass: {
+                                popup: "bg-base-100 text-base-content border border-base-300 rounded-3xl shadow-2xl"
+                            }
                         });
                         // Navigate back to user dashboard
                         navigate('/dashboard/my-loans');
@@ -114,16 +120,18 @@ const CheckoutForm = ({ application, price }) => {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="border border-gray-300 p-4 rounded-lg bg-white shadow-sm">
+            {/* ✅ FIX: Dynamic Dark Mode UI for Stripe Card Container */}
+            <div className="border border-base-300 p-5 rounded-xl bg-base-200 shadow-sm transition-colors duration-300">
                 <CardElement
                     options={{
                         style: {
                             base: {
                                 fontSize: '16px',
-                                color: '#424770',
+                                // ✅ FIX: CSS Variable used so Stripe text adapts to Dark/Light Mode
+                                color: 'var(--fallback-bc, oklch(var(--bc)))', 
                                 fontFamily: 'sans-serif',
                                 '::placeholder': {
-                                    color: '#aab7c4',
+                                    color: '#9ca3af', // Gray-400 for placeholder
                                 },
                             },
                             invalid: {
@@ -135,18 +143,18 @@ const CheckoutForm = ({ application, price }) => {
             </div>
             
             {/* Error Message */}
-            {error && <p className="text-red-500 text-sm font-semibold mt-2">{error}</p>}
+            {error && <p className="text-error text-sm font-semibold mt-2">{error}</p>}
             
             {/* Transaction Success Message */}
-            {transactionId && <p className="text-green-600 text-sm">Transaction ID: {transactionId}</p>}
+            {transactionId && <p className="text-success text-sm font-bold">Transaction ID: {transactionId}</p>}
 
             {/* Pay Button */}
             <button 
-                className={`btn btn-primary w-full text-white text-lg ${processing ? 'loading' : ''}`} 
+                className="btn btn-primary w-full text-white text-lg rounded-xl shadow-lg shadow-primary/30 transition-all border-none" 
                 type="submit" 
                 disabled={!stripe || !clientSecret || processing}
             >
-                {processing ? "Processing..." : `Pay $${price}`}
+                {processing ? <span className="loading loading-spinner"></span> : `Pay $${price}`}
             </button>
         </form>
     );

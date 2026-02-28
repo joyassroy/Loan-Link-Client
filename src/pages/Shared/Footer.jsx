@@ -1,68 +1,99 @@
-import { FaFacebook, FaTwitter, FaLinkedin, FaYoutube } from "react-icons/fa";
+import { FaFacebook, FaTwitter, FaLinkedin, FaYoutube, FaPaperPlane } from "react-icons/fa";
 import { Link } from "react-router-dom";
+
+// --- CUSTOM LL ICON (Same as Navbar & Home) ---
+const LLIcon = ({ size = "w-10 h-10", strokeWidth = "8" }) => (
+    <svg viewBox="0 0 100 100" className={`${size} drop-shadow-lg`}>
+        <defs>
+            <linearGradient id="footerLLGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#22D3EE" />
+                <stop offset="100%" stopColor="#3B82F6" />
+            </linearGradient>
+        </defs>
+        <path d="M 30 15 V 85 H 15 M 15 15 V 85 H 60 Q 65 85 65 80 V 65 H 40 Q 35 65 35 70 V 85" 
+              fill="none" stroke="url(#footerLLGradient)" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
 
 const Footer = () => {
     return (
-        <footer className="bg-gray-900 text-gray-300 pt-16 pb-8">
-            <div className="container mx-auto px-4">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+        <footer className="bg-base-100 text-base-content pt-24 pb-12 border-t border-base-content/5 relative overflow-hidden">
+            {/* Background Glow Deco */}
+            <div className="absolute top-0 left-1/4 w-64 h-64 bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
+            
+            <div className="container mx-auto px-6 relative z-10">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-16">
                     
-                    {/* Brand Section */}
-                    <div className="space-y-4">
-                        <Link to="/" className="text-2xl font-extrabold tracking-wide text-white flex items-center gap-2">
-                            <div className="w-8 h-8 bg-gradient-to-tr from-primary to-secondary rounded-lg flex items-center justify-center text-white text-xs shadow-md">LL</div>
-                            Loan<span className="text-primary">Link</span>
+                    {/* Brand Section - 4 Columns */}
+                    <div className="md:col-span-4 space-y-8">
+                        <Link to="/" className="flex items-center gap-3 group">
+                            <LLIcon size="w-12 h-12" strokeWidth="10" />
+                            <div className="flex flex-col leading-none">
+                                <span className="text-3xl font-[1000] uppercase tracking-tighter text-base-content group-hover:text-primary transition-colors">
+                                    Loan<span className="text-primary italic group-hover:text-base-content">Link</span>
+                                </span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40">Financial Protocol</span>
+                            </div>
                         </Link>
-                        <p className="text-sm leading-relaxed text-gray-400">
-                            Connecting dreams with reality. We provide fast, secure, and reliable loan services tailored to your needs.
+                        <p className="text-lg font-medium opacity-60 leading-relaxed italic max-w-sm">
+                            The next-gen AI lending protocol. Fast, secure, and transparent funding for the digital age.
                         </p>
-                        <div className="flex gap-4 pt-2">
-                            <a href="#" className="hover:text-primary transition-colors text-xl"><FaFacebook /></a>
-                            <a href="#" className="hover:text-primary transition-colors text-xl"><FaTwitter /></a>
-                            <a href="#" className="hover:text-primary transition-colors text-xl"><FaLinkedin /></a>
-                            <a href="#" className="hover:text-red-500 transition-colors text-xl"><FaYoutube /></a>
+                        <div className="flex gap-4">
+                            {[FaFacebook, FaTwitter, FaLinkedin, FaYoutube].map((Icon, i) => (
+                                <a key={i} href="#" className="w-12 h-12 rounded-2xl bg-base-200 flex items-center justify-center text-xl hover:bg-primary hover:text-white hover:-translate-y-1 transition-all duration-300">
+                                    <Icon />
+                                </a>
+                            ))}
                         </div>
                     </div>
 
-                    {/* Quick Links */}
-                    <div>
-                        <h3 className="text-white font-bold text-lg mb-4">Quick Links</h3>
-                        <ul className="space-y-2 text-sm">
-                            <li><Link to="/" className="hover:text-primary hover:translate-x-1 inline-block transition-all">Home</Link></li>
-                            <li><Link to="/all-loans" className="hover:text-primary hover:translate-x-1 inline-block transition-all">All Loans</Link></li>
-                            <li><Link to="/dashboard/profile" className="hover:text-primary hover:translate-x-1 inline-block transition-all">My Dashboard</Link></li>
-                            <li><Link to="/about" className="hover:text-primary hover:translate-x-1 inline-block transition-all">About Us</Link></li>
+                    {/* Quick Links - 2 Columns */}
+                    <div className="md:col-span-2">
+                        <h3 className="text-xs font-[1000] uppercase tracking-[0.3em] mb-8 text-primary opacity-80">Navigation</h3>
+                        <ul className="space-y-4 text-sm font-black uppercase tracking-tight italic opacity-70">
+                            <li><Link to="/" className="hover:text-primary hover:pl-2 transition-all block">Home</Link></li>
+                            <li><Link to="/all-loans" className="hover:text-primary hover:pl-2 transition-all block">All Vaults</Link></li>
+                            <li><Link to="/dashboard" className="hover:text-primary hover:pl-2 transition-all block">Dashboard</Link></li>
+                            <li><Link to="/about" className="hover:text-primary hover:pl-2 transition-all block">About US</Link></li>
                         </ul>
                     </div>
 
-                    {/* Services */}
-                    <div>
-                        <h3 className="text-white font-bold text-lg mb-4">Our Services</h3>
-                        <ul className="space-y-2 text-sm">
-                            <li><a className="hover:text-primary transition-colors">Personal Loans</a></li>
-                            <li><a className="hover:text-primary transition-colors">Business Capital</a></li>
-                            <li><a className="hover:text-primary transition-colors">Education Funding</a></li>
-                            <li><a className="hover:text-primary transition-colors">Home Improvement</a></li>
+                    {/* Services - 2 Columns */}
+                    <div className="md:col-span-2">
+                        <h3 className="text-xs font-[1000] uppercase tracking-[0.3em] mb-8 text-primary opacity-80">Services</h3>
+                        <ul className="space-y-4 text-sm font-black uppercase tracking-tight italic opacity-70">
+                            <li><a className="hover:text-primary transition-all cursor-pointer block">Personal</a></li>
+                            <li><a className="hover:text-primary transition-all cursor-pointer block">Business</a></li>
+                            <li><a className="hover:text-primary transition-all cursor-pointer block">Education</a></li>
+                            <li><a className="hover:text-primary transition-all cursor-pointer block">Real Estate</a></li>
                         </ul>
                     </div>
 
-                    {/* Newsletter */}
-                    <div>
-                        <h3 className="text-white font-bold text-lg mb-4">Stay Updated</h3>
-                        <p className="text-sm text-gray-400 mb-3">Subscribe to get the latest loan offers.</p>
-                        <div className="join w-full">
-                            <input className="input input-bordered join-item w-full bg-gray-800 border-gray-700 text-white focus:outline-none" placeholder="Email address" />
-                            <button className="btn btn-primary join-item rounded-r-full text-white">Subscribe</button>
+                    {/* Newsletter - 4 Columns */}
+                    <div className="md:col-span-4">
+                        <h3 className="text-xs font-[1000] uppercase tracking-[0.3em] mb-8 text-primary opacity-80">Stay Linked</h3>
+                        <p className="text-sm font-bold opacity-50 mb-6 italic uppercase tracking-tighter">Subscribe to our neural update channel.</p>
+                        <div className="relative">
+                            <input 
+                                className="w-full bg-base-200 border-none rounded-[2rem] py-5 px-8 text-sm font-bold focus:ring-2 ring-primary transition-all outline-none italic placeholder:opacity-30" 
+                                placeholder="YOUR@EMAIL.COM" 
+                            />
+                            <button className="absolute right-2 top-2 bottom-2 bg-primary text-white rounded-full px-6 flex items-center justify-center hover:scale-105 transition-all shadow-lg shadow-primary/20">
+                                <FaPaperPlane />
+                            </button>
                         </div>
                     </div>
                 </div>
 
                 {/* Bottom Bar */}
-                <div className="border-t border-gray-800 mt-12 pt-8 text-center text-sm text-gray-500 flex flex-col md:flex-row justify-between items-center">
-                    <p>&copy; {new Date().getFullYear()} LoanLink. All rights reserved.</p>
-                    <div className="flex gap-6 mt-4 md:mt-0">
-                        <a href="#" className="hover:text-white">Privacy Policy</a>
-                        <a href="#" className="hover:text-white">Terms of Service</a>
+                <div className="mt-24 pt-10 border-t border-base-content/5 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <p className="text-[10px] font-black uppercase tracking-widest opacity-40 italic">
+                        &copy; {new Date().getFullYear()} LoanLink Protocol. Encrypted & Verified.
+                    </p>
+                    <div className="flex gap-8 text-[10px] font-black uppercase tracking-widest opacity-40 italic">
+                        <a href="#" className="hover:text-primary transition-colors">Privacy</a>
+                        <a href="#" className="hover:text-primary transition-colors">Terms</a>
+                        <a href="#" className="hover:text-primary transition-colors">Nodes</a>
                     </div>
                 </div>
             </div>

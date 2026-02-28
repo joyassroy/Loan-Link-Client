@@ -2,191 +2,237 @@ import { useState } from "react";
 import useAxiosPublic from "../../hooks/useAxiosPublic";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { FaSearch, FaFilter, FaDollarSign, FaPercent, FaArrowRight, FaLayerGroup, FaRedo } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaSearch, FaFilter, FaDollarSign, FaPercent, FaArrowRight, FaLayerGroup, FaRedo, FaSortAmountDown, FaUniversity } from "react-icons/fa";
 
 const AllLoans = () => {
     const axiosPublic = useAxiosPublic();
+    
+    // --- STATE MANAGEMENT ---
     const [search, setSearch] = useState('');
     const [category, setCategory] = useState('');
+    const [sort, setSort] = useState(''); 
+    const [page, setPage] = useState(0); 
+    const size = 6; 
 
-    // --- 1. DATA FETCHING ---
-    const { data: loans = [], isLoading } = useQuery({
-        queryKey: ['all-loans'], 
+    // --- 1. FETCH TOTAL COUNT ---
+    const { data: countData = { count: 0 } } = useQuery({
+        queryKey: ['loansCount', search, category],
         queryFn: async () => {
-            const res = await axiosPublic.get('/loans');
+            const res = await axiosPublic.get(`/loansCount?search=${search}&category=${category}`);
             return res.data;
         }
     });
 
-    // --- 2. SMART FILTERING LOGIC (Fixed) ---
-    const filteredLoans = loans.filter(loan => {
-        // Search Logic (Safe check)
-        const title = loan.title ? loan.title.toLowerCase() : "";
-        const matchTitle = title.includes(search.toLowerCase());
+    const totalCount = countData.count;
+    const numberOfPages = Math.ceil(totalCount / size);
+    const pages = [...Array(numberOfPages).keys()];
 
-        // Category Logic (Safe & Flexible check)
-        // ডাটাবেসে 'Business' থাকুক বা 'Business Loan', ড্রপডাউনের 'Business' এর সাথে ম্যাচ করবে।
-        const dbCategory = loan.category ? loan.category.toLowerCase() : "";
-        const filterCategory = category.toLowerCase();
-
-        const matchCategory = category 
-            ? dbCategory.includes(filterCategory) // Partial match allowed
-            : true;
-        
-        return matchTitle && matchCategory;
+    // --- 2. FETCH LOANS ---
+    const { data: loans = [], isLoading } = useQuery({
+        queryKey: ['all-loans', page, size, search, category, sort], 
+        queryFn: async () => {
+            const res = await axiosPublic.get(`/loans?page=${page}&size=${size}&search=${search}&category=${category}&sort=${sort}`);
+            return res.data;
+        }
     });
 
-    // Reset Function
+    // --- HANDLERS ---
     const handleReset = () => {
         setSearch('');
         setCategory('');
+        setSort('');
+        setPage(0);
     };
 
-    // Loading State
-    if (isLoading) {
-        return (
-            <div className="flex justify-center items-center h-screen bg-gray-50">
-                <span className="loading loading-bars loading-lg text-primary"></span>
-            </div>
-        );
-    }
-
     return (
-        <div className="min-h-screen bg-gray-50 font-sans pb-20">
+        <div className="min-h-screen bg-base-200 text-base-content font-sans pb-32 transition-colors duration-300 overflow-hidden">
             
-            {/* --- HERO HEADER --- */}
-            <div className="relative bg-gradient-to-r from-primary to-secondary py-16 px-4 text-center text-white">
-                <div className="relative z-10 max-w-3xl mx-auto space-y-3">
-                    <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">
-                        Explore Loan Packages
-                    </h2>
-                    <p className="text-white/90 text-lg font-light">
-                        Find the perfect financial solution tailored to your needs.
-                    </p>
+            {/* --- 1. PREMIUM HERO HEADER --- */}
+            <div className="relative bg-neutral py-24 px-6 text-center overflow-hidden">
+                <motion.div 
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 0.1 }}
+                    transition={{ duration: 1.5 }}
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                >
+                    <FaUniversity className="text-[30rem] text-primary" />
+                </motion.div>
+                
+                <div className="relative z-10 max-w-4xl mx-auto space-y-6">
+                    <motion.h2 
+                        initial={{ y: -50, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        className="text-6xl md:text-8xl font-[1000] uppercase tracking-tighter italic text-white leading-none"
+                    >
+                        Loan <span className="text-primary underline underline-offset-8">Vaults</span>
+                    </motion.h2>
+                    <motion.p 
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                        className="text-primary-content/60 text-xl font-black uppercase tracking-[0.3em] italic"
+                    >
+                        Secure your future with AI-Driven Funding
+                    </motion.p>
                 </div>
             </div>
 
-            {/* --- SEARCH & FILTER BAR --- */}
-            <div className="container mx-auto px-4 -mt-8 relative z-20">
-                <div className="bg-white p-4 md:p-6 rounded-2xl shadow-xl flex flex-col md:flex-row gap-4 items-center justify-between border border-gray-100">
-                    
-                    {/* Search Input */}
-                    <div className="relative w-full md:w-1/2">
-                        <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+            {/* --- 2. SEARCH & FILTER CONSOLE --- */}
+            <div className="container mx-auto px-6 -mt-16 relative z-30">
+                <motion.div 
+                    initial={{ y: 50, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    className="bg-base-100 p-8 rounded-[3rem] shadow-2xl flex flex-col lg:flex-row gap-6 items-center border border-base-content/5"
+                >
+                    {/* Search */}
+                    <div className="relative flex-1 w-full">
+                        <FaSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-primary" />
                         <input 
                             type="text" 
-                            placeholder="Search by loan title..." 
-                            className="input input-bordered w-full pl-12 rounded-xl focus:ring-2 ring-primary/20 bg-gray-50 focus:bg-white transition-all"
+                            placeholder="PROTOCOL SEARCH..." 
+                            className="input w-full pl-16 h-16 rounded-3xl bg-base-200 border-none font-black italic tracking-tighter focus:ring-2 ring-primary transition-all uppercase"
                             value={search}
-                            onChange={(e) => setSearch(e.target.value)}
+                            onChange={(e) => {setSearch(e.target.value); setPage(0);}}
                         />
                     </div>
 
-                    {/* Category Filter (Simplified Values) */}
-                    <div className="relative w-full md:w-1/4">
-                        <FaFilter className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                    {/* Category */}
+                    <div className="relative w-full lg:w-64">
                         <select 
-                            className="select select-bordered w-full pl-12 rounded-xl focus:ring-2 ring-primary/20 bg-gray-50 focus:bg-white cursor-pointer"
-                            onChange={(e) => setCategory(e.target.value)}
+                            className="select w-full h-16 rounded-3xl bg-base-200 border-none font-black italic tracking-tighter focus:ring-2 ring-primary transition-all uppercase px-8"
+                            onChange={(e) => {setCategory(e.target.value); setPage(0);}}
                             value={category}
                         >
-                            <option value="">All Categories</option>
-                            {/* Value তে ছোট শব্দ রাখো যাতে ম্যাচ করতে সুবিধা হয় */}
-                            <option value="Personal">Personal Loan</option>
-                            <option value="Business">Business Loan</option>
-                            <option value="Home">Home Loan</option>
-                            <option value="Vehicle">Vehicle Loan</option>
-                            <option value="Education">Education Loan</option>
+                            <option value="">All Sectors</option>
+                            <option value="Personal">Personal</option>
+                            <option value="Business">Business</option>
+                            <option value="Home">Home</option>
+                            <option value="Vehicle">Vehicle</option>
+                            <option value="Education">Education</option>
                         </select>
                     </div>
-                </div>
+
+                    {/* Sort */}
+                    <div className="relative w-full lg:w-72">
+                        <select 
+                            className="select w-full h-16 rounded-3xl bg-base-200 border-none font-black italic tracking-tighter focus:ring-2 ring-primary transition-all uppercase px-8"
+                            onChange={(e) => {setSort(e.target.value); setPage(0);}}
+                            value={sort}
+                        >
+                            <option value="">Sort: Default</option>
+                            <option value="limit-asc">Limit: Low to High</option>
+                            <option value="limit-desc">Limit: High to Low</option>
+                            <option value="interest-asc">Interest: Low to High</option>
+                            <option value="interest-desc">Interest: High to Low</option>
+                        </select>
+                    </div>
+                    
+                    <button onClick={handleReset} className="btn btn-square h-16 w-16 rounded-3xl btn-primary text-xl shadow-lg shadow-primary/20">
+                        <FaRedo />
+                    </button>
+                </motion.div>
             </div>
 
-            {/* --- LOANS GRID --- */}
-            <div className="container mx-auto px-4 mt-12">
-                {filteredLoans.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {filteredLoans.map((loan) => (
-                            <div 
-                                key={loan._id} 
-                                className="card bg-white shadow-lg hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-hidden group border border-gray-100 flex flex-col h-full"
-                            >
-                                {/* Image Section */}
-                                <figure className="relative h-56 overflow-hidden">
-                                    <img 
-                                        src={loan.image} 
-                                        alt={loan.title} 
-                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                    />
-                                    <div className="absolute top-4 right-4 badge badge-secondary badge-lg shadow-md font-bold uppercase tracking-wider text-xs">
-                                        {loan.category}
-                                    </div>
-                                </figure>
-
-                                {/* Content Section */}
-                                <div className="card-body p-6 flex-grow">
-                                    <h3 className="card-title text-2xl font-bold text-gray-800 group-hover:text-primary transition-colors">
-                                        {loan.title}
-                                    </h3>
-                                    
-                                    <div className="divider my-2"></div>
-
-                                    {/* Stats Grid */}
-                                    <div className="grid grid-cols-2 gap-4 mt-2">
-                                        <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
-                                            <div className="p-2 bg-blue-100 text-blue-600 rounded-full">
-                                                <FaDollarSign />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs text-gray-500 font-bold uppercase">Max Limit</p>
-                                                <p className="font-bold text-gray-800">${loan.maxLoanLimit || loan.maxLimit}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-xl">
-                                            <div className="p-2 bg-purple-100 text-purple-600 rounded-full">
-                                                <FaPercent />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs text-gray-500 font-bold uppercase">Interest</p>
-                                                <p className="font-bold text-gray-800">{loan.interest || loan.interestRate}%</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Action Button */}
-                                <div className="p-6 pt-0 mt-auto">
-                                    <Link to={`/loans/${loan._id}`}>
-                                        <button className="btn btn-primary w-full rounded-xl text-lg text-white shadow-lg shadow-primary/30 flex items-center justify-center gap-2 group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-secondary transition-all border-none">
-                                            View & Apply <FaArrowRight />
-                                        </button>
-                                    </Link>
-                                    <p className="text-xs text-center text-gray-400 mt-2">
-                                        Simple & Fast Process
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    // --- NO DATA FOUND UI (Smart Reset) ---
-                    <div className="text-center py-20 bg-white rounded-3xl shadow-sm border border-gray-100 max-w-lg mx-auto">
-                        <div className="bg-gray-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400 text-4xl">
-                            <FaLayerGroup />
-                        </div>
-                        <h3 className="text-2xl font-bold text-gray-600">No Loans Found</h3>
-                        <p className="text-gray-500 px-6">
-                            We couldn't find any loans matching "{search}" in the "{category}" category.
-                        </p>
-                        
-                        {/* Reset Button */}
-                        <button 
-                            onClick={handleReset} 
-                            className="btn btn-outline btn-primary mt-6 rounded-full px-8 gap-2"
+            {/* --- 3. GRID & CARDS --- */}
+            <div className="container mx-auto px-6 mt-24">
+                <AnimatePresence mode="wait">
+                    {isLoading ? (
+                        <motion.div 
+                            key="loader"
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12"
                         >
-                            <FaRedo /> Clear Filters
-                        </button>
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className="h-[500px] rounded-[4rem] bg-base-300/30 animate-pulse border border-base-content/5" />
+                            ))}
+                        </motion.div>
+                    ) : loans.length > 0 ? (
+                        <motion.div 
+                            key="grid"
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12"
+                        >
+                            {loans.map((loan) => (
+                                <motion.div 
+                                    key={loan._id} 
+                                    whileHover={{ y: -20 }}
+                                    className="bg-base-100 rounded-[4rem] p-6 shadow-xl border border-base-content/5 group relative overflow-hidden"
+                                >
+                                    {/* Image Wrapper */}
+                                    <div className="h-72 rounded-[3.5rem] overflow-hidden relative mb-8">
+                                        <img src={loan.image} alt={loan.title} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110" />
+                                        <div className="absolute top-6 right-6 px-6 py-2 bg-primary text-white font-[1000] italic uppercase tracking-widest text-[10px] rounded-full shadow-2xl">
+                                            {loan.category}
+                                        </div>
+                                    </div>
+
+                                    {/* Content */}
+                                    <div className="px-4 pb-4">
+                                        <h3 className="text-3xl font-[1000] uppercase italic tracking-tighter mb-8 group-hover:text-primary transition-colors leading-none">
+                                            {loan.title}
+                                        </h3>
+                                        
+                                        <div className="grid grid-cols-2 gap-4 mb-10">
+                                            <div className="p-6 bg-base-200 rounded-[2.5rem] border border-base-content/5">
+                                                <p className="text-[10px] font-black opacity-40 uppercase mb-2 tracking-widest">Cap Limit</p>
+                                                <p className="text-2xl font-[1000] italic text-base-content tracking-tighter">${loan.maxLoanLimit || loan.maxLimit}</p>
+                                            </div>
+                                            <div className="p-6 bg-base-200 rounded-[2.5rem] border border-base-content/5">
+                                                <p className="text-[10px] font-black opacity-40 uppercase mb-2 tracking-widest">Yield</p>
+                                                <p className="text-2xl font-[1000] italic text-primary tracking-tighter">{loan.interest || loan.interestRate}%</p>
+                                            </div>
+                                        </div>
+
+                                        <Link to={`/loans/${loan._id}`}>
+                                            <button className="w-full h-20 bg-neutral text-white rounded-[2rem] font-[1000] uppercase italic tracking-widest flex items-center justify-center gap-4 hover:bg-primary transition-all shadow-xl">
+                                                Initialize Apply <FaArrowRight />
+                                            </button>
+                                        </Link>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </motion.div>
+                    ) : (
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-32 bg-base-100 rounded-[4rem] border border-base-content/5 max-w-2xl mx-auto shadow-2xl">
+                            <FaLayerGroup className="text-9xl text-primary/10 mx-auto mb-8" />
+                            <h3 className="text-5xl font-[1000] uppercase tracking-tighter italic mb-4">No Vaults Found</h3>
+                            <p className="text-base-content/50 font-black uppercase tracking-widest text-xs mb-10">Protocol could not locate matching records.</p>
+                            <button onClick={handleReset} className="btn btn-primary rounded-full px-12 h-16 font-black uppercase italic tracking-widest">Reset System</button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* --- 4. PAGINATION --- */}
+                {numberOfPages > 1 && (
+                    <div className="flex justify-center mt-32">
+                        <div className="flex gap-4 p-4 bg-base-100 rounded-[3rem] shadow-2xl border border-base-content/5 overflow-x-auto max-w-full">
+                            <button 
+                                onClick={() => setPage(page > 0 ? page - 1 : 0)} 
+                                disabled={page === 0}
+                                className="h-16 px-8 rounded-[2rem] font-[1000] uppercase italic tracking-widest bg-base-200 hover:bg-primary hover:text-white transition-all disabled:opacity-20"
+                            >
+                                Prev
+                            </button>
+
+                            {pages.map(p => (
+                                <button 
+                                    key={p} 
+                                    onClick={() => setPage(p)}
+                                    className={`h-16 w-16 rounded-[2rem] font-[1000] transition-all ${page === p ? 'bg-primary text-white scale-110 shadow-lg shadow-primary/30' : 'bg-base-200 hover:bg-base-300 opacity-50'}`}
+                                >
+                                    {p + 1}
+                                </button>
+                            ))}
+
+                            <button 
+                                onClick={() => setPage(page < numberOfPages - 1 ? page + 1 : page)} 
+                                disabled={page === numberOfPages - 1}
+                                className="h-16 px-8 rounded-[2rem] font-[1000] uppercase italic tracking-widest bg-base-200 hover:bg-primary hover:text-white transition-all disabled:opacity-20"
+                            >
+                                Next
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>

@@ -7,32 +7,36 @@ import Home from "../pages/Home/Home";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 import AllLoans from "../pages/AllLoans/AllLoans";
-//import LoanDetails from "../pages/LoanDetails/LoanDetails";
 import ErrorPage from "../pages/ErrorPage/ErrorPage";
 import Contact from "../pages/Contact/Contact"; 
 import About from "../pages/About/About";  
 import MyLoans from "../pages/Dashboard/Borrower/MyLoans"; 
 import Payment from "../pages/Dashboard/Borrower/Payment";
-// পাথ (path) চেক করে নিও     
+
 // Private Dashboard Pages
 import PrivateRoute from "./PrivateRoute";
-import AdminRoute from "./AdminRoute"; // Import the file you just made
+import AdminRoute from "./AdminRoute"; 
 import LoanDetails from "../pages/AllLoans/LoanDetails";
+
 // Common
 import Profile from "../pages/Dashboard/Profile";
+import Overview from "../pages/Dashboard/Overview/Overview"; // ✅ নতুন Overview কম্পোনেন্ট ইমপোর্ট করা হলো
 
 // Admin
 import ManageUsers from "../pages/Dashboard/Admin/ManageUsers";
 import AdminAllLoans from "../pages/Dashboard/Admin/AdminAllLoans";
+import LoanApplications from "../pages/Dashboard/Admin/LoanApplications";
+
 // Manager
 import AddLoan from "../pages/Dashboard/Manager/AddLoan";
 import ManageLoans from "../pages/Dashboard/Manager/ManageLoans";
 import PendingLoans from "../pages/Dashboard/Manager/PendingLoans";
-import LoanApplications from "../pages/Dashboard/Admin/LoanApplications";
 import ApprovedLoans from "../pages/Dashboard/Manager/ApprovedLoans";
 import LoanApplication from "../pages/AllLoans/LoanApplication";
-// Borrower
-//import MyLoans from "../pages/Dashboard/Borrower/MyLoans";
+
+// --- ডামি কম্পোনেন্ট (যেগুলোর ফাইল এখনো বানানো হয়নি) ---
+import Settings from "../pages/Dashboard/Borrower/Settings";
+import Reports from "../pages/Dashboard/Admin/Reports";
 
 
 const router = createBrowserRouter([
@@ -54,7 +58,6 @@ const router = createBrowserRouter([
       {
         path: "loans/:id", 
         element: <PrivateRoute><LoanDetails></LoanDetails></PrivateRoute> 
-        // নোট: যদি চাও লগইন ছাড়াও দেখবে, তাহলে <PrivateRoute> সরিয়ে শুধু <LoanDetails /> দাও
       },
       {
         path: "application/:id",
@@ -72,12 +75,21 @@ const router = createBrowserRouter([
   },
   {
     path: "dashboard",
-    element: <PrivateRoute><DashboardLayout /></PrivateRoute>, // Protect Entire Dashboard
+    element: <PrivateRoute><DashboardLayout /></PrivateRoute>, 
     children: [
-      // Common Route
+      
+      // ✅ COMMON ROUTES (Admin, Manager, User সবাই দেখতে পাবে)
+      {
+        index: true, // ✅ এটি /dashboard এ গেলে ডিফল্টভাবে Overview পেজ দেখাবে
+        element: <Overview />, 
+      },
       {
         path: "profile",
         element: <Profile />,
+      },
+      {
+        path: "settings", // ✅ নতুন Settings রাউট
+        element: <Settings />,
       },
       {
           path: "payment/:id",
@@ -90,19 +102,22 @@ const router = createBrowserRouter([
         element: <AdminRoute><ManageUsers /></AdminRoute>,
       },
       {
-    path: "admin-all-loans",
-    element: <AdminRoute><AdminAllLoans /></AdminRoute>,
-},
-{
+        path: "admin-all-loans",
+        element: <AdminRoute><AdminAllLoans /></AdminRoute>,
+      },
+      {
         path: "loan-applications",
         element: <AdminRoute><LoanApplications /></AdminRoute>,
       },
-      // You can add 'admin-all-loans' here similarly
+      {
+        path: "reports", // ✅ নতুন Reports রাউট (শুধু Admin এর জন্য)
+        element: <AdminRoute><Reports /></AdminRoute>,
+      },
 
       // --- MANAGER ROUTES ---
       {
         path: "add-loan",
-        element: <AddLoan />, // Wrap in <ManagerRoute> if you created it
+        element: <AddLoan />, 
       },
       {
         path: "manage-loans",
@@ -114,7 +129,7 @@ const router = createBrowserRouter([
       },
       {
         path: "approved-loans",
-        element: <ApprovedLoans />, // Can wrap in ManagerRoute
+        element: <ApprovedLoans />, 
       },
 
       // --- BORROWER ROUTES ---

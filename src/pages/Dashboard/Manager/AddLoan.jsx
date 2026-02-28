@@ -2,6 +2,7 @@ import { useState } from "react";
 import Swal from "sweetalert2";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import useAuth from "../../../hooks/useAuth";
+import { FaFileInvoiceDollar, FaImage, FaPercentage, FaDollarSign } from "react-icons/fa";
 
 const AddLoan = () => {
     const { user } = useAuth();
@@ -41,9 +42,14 @@ const AddLoan = () => {
             if (res.data.insertedId) {
                 Swal.fire({
                     title: "Success!",
-                    text: "Loan Added Successfully",
+                    text: "Loan Package Published Successfully",
                     icon: "success",
-                    confirmButtonText: "Cool"
+                    background: "inherit",
+                    color: "inherit",
+                    customClass: {
+                        popup: "bg-base-100 text-base-content border border-base-300 rounded-3xl shadow-2xl",
+                        confirmButton: "btn btn-primary text-white"
+                    }
                 });
                 form.reset();
                 setImagePreview("");
@@ -53,7 +59,11 @@ const AddLoan = () => {
                 title: "Error!",
                 text: error.message,
                 icon: "error",
-                confirmButtonText: "Ok"
+                background: "inherit",
+                color: "inherit",
+                customClass: {
+                    popup: "bg-base-100 text-base-content border border-base-300 rounded-3xl"
+                }
             });
         }
     };
@@ -62,31 +72,34 @@ const AddLoan = () => {
         setImagePreview(e.target.value);
     };
 
-    // Common Input Class for Consistency
-    const inputClass = "input input-bordered w-full h-12 rounded-lg bg-gray-50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 border-gray-200";
+    // Common Input Class for Dark/Light Consistency
+    const inputClass = "input input-bordered w-full h-12 rounded-xl bg-base-200 text-base-content focus:bg-base-100 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 border-base-300";
 
     return (
-        <div className="w-full min-h-screen bg-base-200 p-6 flex items-center justify-center font-sans">
-            <div className="card w-full max-w-5xl shadow-2xl bg-base-100 rounded-2xl overflow-hidden">
+        <div className="w-full min-h-screen bg-base-200 p-4 md:p-10 flex items-center justify-center font-sans transition-colors duration-300 pb-24">
+            <div className="card w-full max-w-5xl shadow-2xl bg-base-100 rounded-3xl overflow-hidden border border-base-300 transition-colors">
                 
-                {/* Header Section with Gradient */}
-                <div className="bg-primary/5 p-8 text-center border-b border-primary/10">
-                    <h2 className="text-4xl font-extrabold text-primary mb-2 tracking-tight">
+                {/* Header Section with Dynamic Gradient Background */}
+                <div className="bg-primary/10 p-8 text-center border-b border-base-300">
+                    <div className="bg-primary/20 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 text-primary text-3xl shadow-inner">
+                        <FaFileInvoiceDollar />
+                    </div>
+                    <h2 className="text-3xl md:text-4xl font-extrabold text-base-content mb-2 tracking-tight">
                         Create New Loan Package
                     </h2>
-                    <p className="text-gray-500 max-w-2xl mx-auto">
+                    <p className="text-base-content/60 max-w-2xl mx-auto font-medium">
                         Design a competitive loan offer by filling out the details below. Ensure accuracy for better borrower trust.
                     </p>
                 </div>
 
-                <div className="card-body p-8 md:p-10">
+                <div className="card-body p-6 md:p-12">
                     <form onSubmit={handleAddLoan} className="space-y-8">
                         
                         {/* Row 1: Title & Category */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="form-control">
                                 <label className="label pl-1">
-                                    <span className="label-text font-bold text-gray-700">Loan Title</span>
+                                    <span className="label-text font-bold text-base-content/80 uppercase text-xs tracking-wider">Loan Title</span>
                                 </label>
                                 <input 
                                     type="text" 
@@ -99,7 +112,7 @@ const AddLoan = () => {
 
                             <div className="form-control">
                                 <label className="label pl-1">
-                                    <span className="label-text font-bold text-gray-700">Category</span>
+                                    <span className="label-text font-bold text-base-content/80 uppercase text-xs tracking-wider">Category</span>
                                 </label>
                                 <select 
                                     name="category" 
@@ -122,7 +135,7 @@ const AddLoan = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="form-control">
                                 <label className="label pl-1">
-                                    <span className="label-text font-bold text-gray-700">Interest Rate (%)</span>
+                                    <span className="label-text font-bold text-base-content/80 uppercase text-xs tracking-wider">Interest Rate (%)</span>
                                 </label>
                                 <div className="relative">
                                     <input 
@@ -133,16 +146,16 @@ const AddLoan = () => {
                                         className={`${inputClass} pr-10`} 
                                         required 
                                     />
-                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-gray-400">%</span>
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-base-content/30"><FaPercentage /></span>
                                 </div>
                             </div>
 
                             <div className="form-control">
                                 <label className="label pl-1">
-                                    <span className="label-text font-bold text-gray-700">Max Loan Limit</span>
+                                    <span className="label-text font-bold text-base-content/80 uppercase text-xs tracking-wider">Max Loan Limit</span>
                                 </label>
                                 <div className="relative">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-400">$</span>
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-base-content/30"><FaDollarSign /></span>
                                     <input 
                                         type="number" 
                                         name="maxLimit" 
@@ -158,7 +171,7 @@ const AddLoan = () => {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
                             <div className="form-control md:col-span-2">
                                 <label className="label pl-1">
-                                    <span className="label-text font-bold text-gray-700">Loan Image URL</span>
+                                    <span className="label-text font-bold text-base-content/80 uppercase text-xs tracking-wider">Loan Image URL</span>
                                 </label>
                                 <input 
                                     type="url" 
@@ -169,22 +182,22 @@ const AddLoan = () => {
                                     required 
                                 />
                                 <label className="label">
-                                    <span className="label-text-alt text-gray-400">Provide a direct link to a high-quality image.</span>
+                                    <span className="label-text-alt text-base-content/40 font-medium">Provide a direct link to a high-quality image.</span>
                                 </label>
                             </div>
                             
                             {/* Stylish Image Preview */}
                             <div className="form-control">
                                 <label className="label pl-1 mb-1">
-                                    <span className="label-text font-bold text-gray-700">Preview</span>
+                                    <span className="label-text font-bold text-base-content/80 uppercase text-xs tracking-wider">Preview</span>
                                 </label>
-                                <div className="h-32 w-full border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center bg-gray-50 overflow-hidden shadow-inner relative group">
+                                <div className="h-32 w-full border-2 border-dashed border-base-300 rounded-2xl flex items-center justify-center bg-base-200 overflow-hidden shadow-inner relative group transition-colors">
                                     {imagePreview ? (
                                         <img src={imagePreview} alt="Preview" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
                                     ) : (
                                         <div className="text-center p-4">
-                                            <span className="text-gray-300 text-4xl block mb-1">📷</span>
-                                            <span className="text-xs text-gray-400 font-medium">Image Preview</span>
+                                            <FaImage className="text-base-content/20 text-4xl mx-auto mb-1" />
+                                            <span className="text-[10px] text-base-content/40 font-bold uppercase tracking-widest">No Image</span>
                                         </div>
                                     )}
                                 </div>
@@ -194,19 +207,19 @@ const AddLoan = () => {
                         {/* Row 4: Description */}
                         <div className="form-control">
                             <label className="label pl-1">
-                                <span className="label-text font-bold text-gray-700">Detailed Description</span>
+                                <span className="label-text font-bold text-base-content/80 uppercase text-xs tracking-wider">Detailed Description</span>
                             </label>
                             <textarea 
                                 name="description" 
-                                className="textarea textarea-bordered h-32 w-full rounded-xl bg-gray-50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 border-gray-200 text-base" 
+                                className="textarea textarea-bordered h-36 w-full rounded-2xl bg-base-200 text-base-content focus:bg-base-100 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 border-base-300 text-base leading-relaxed" 
                                 placeholder="Describe the loan terms, benefits, and requirements..." 
                                 required
                             ></textarea>
                         </div>
 
                         {/* Submit Button */}
-                        <div className="form-control mt-4 pt-4 border-t border-gray-100">
-                            <button className="btn btn-primary btn-lg w-full text-white text-lg font-bold rounded-xl shadow-lg hover:shadow-primary/40 transform hover:-translate-y-1 transition-all duration-300">
+                        <div className="form-control mt-4 pt-6 border-t border-base-300">
+                            <button className="btn btn-primary btn-lg w-full text-white text-lg font-bold rounded-2xl shadow-xl hover:shadow-primary/40 transform hover:-translate-y-1 transition-all duration-300">
                                 Publish Loan Package
                             </button>
                         </div>

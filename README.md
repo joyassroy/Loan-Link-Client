@@ -1,16 +1,81 @@
-# React + Vite
+# 🏦 LoanLink - Micro-Finance & Loan Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+LoanLink is a comprehensive full-stack web application designed to bridge the gap between borrowers and lenders. It streamlines the loan application process, offers real-time status tracking, and provides a robust dashboard for administrators to manage users, applications, and loan categories efficiently.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🔗 Live Links
+- **Client Side Repo:** [https://github.com/joyassroy/Loan-Link-Client]
+- **Server Side Repo:** [https://github.com/joyassroy/Loan-Link-Server]
+- **Live Website:** [https://assignment-11-468e1.web.app/]
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🚀 Key Features
+
+### 🌟 User Experience (Frontend)
+- **Modern UI/UX:** Built with React, Tailwind CSS, and DaisyUI for a clean, responsive interface.
+- **Smooth Animations:** Integrated **Framer Motion** for engaging entry animations and interactions.
+- **Loan EMI Calculator:** A handy tool on the home page for users to estimate monthly payments before applying.
+- **Success Celebration:** **React-Confetti** animation triggers upon successful loan application submission.
+- **Creative 404 Page:** A custom, interactive error page to guide lost users back home.
+
+### 💼 Functionality (Backend & Logic)
+- **Secure Authentication:** Firebase Authentication (Email/Password & Google Social Login) with JWT (JSON Web Token) verification for secure route access.
+- **Role-Based Access Control (RBAC):** Distinct dashboards for **Admin**, **Manager**, and **Borrower** (User).
+- **Dashboard Charts:** Visual data representation using **Recharts** to show loan statistics and application status.
+- **PDF Generation:** Users can download their loan approval/payment receipts as PDF using `react-to-print`.
+- **Payment Integration:** Secure payment processing via **Stripe** for loan processing fees.
+
+---
+
+## 🛠️ Technologies Used
+
+### Frontend
+- **React.js** (Vite)
+- **Tailwind CSS** & **DaisyUI**
+- **Framer Motion** (Animations)
+- **TanStack Query** (Data Fetching)
+- **Axios** (API Requests)
+- **SweetAlert2** (Notifications)
+- **Recharts** (Data Visualization)
+
+### Backend
+- **Node.js** & **Express.js**
+- **MongoDB** (Database)
+- **JWT** (Authentication)
+- **Stripe** (Payments)
+- **Cookie Parser**
+
+### Tools & Deployment
+- **Firebase** (Auth & Hosting)
+- **Vercel** (Backend & Frontend Deployment)
+- **GitHub** (Version Control)
+
+---
+
+## 📦 NPM Packages Used
+- `react-router-dom`
+- `react-hook-form`
+- `stripe/react-stripe-js`
+- `react-confetti`
+- `react-to-print`
+- `localforage`
+- `match-sorter`
+- `sort-by`
+
+---
+
+## 💻 Local Installation Guide
+
+Follow these steps to run the project locally on your machine.
+
+### Prerequisites
+Ensure you have **Node.js** installed.
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/joyassroy/Loan-Link-Client.git
+cd loanlink-client

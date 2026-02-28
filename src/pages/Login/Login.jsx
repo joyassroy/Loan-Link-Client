@@ -3,11 +3,10 @@ import { useLocation, useNavigate, Link } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import useAxiosPublic from "../../hooks/useAxiosPublic";
 import { FcGoogle } from "react-icons/fc";
-import { FaUserAlt, FaLock, FaShieldAlt, FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
+import { FaUserAlt, FaLock, FaShieldAlt, FaCheckCircle, FaExclamationCircle, FaUserSecret, FaUserTie } from "react-icons/fa";
 import Swal from "sweetalert2";
 
 const Login = () => {
-    // --- AUTH LOGIC (UNCHANGED) ---
     const { signIn, googleSignIn } = useAuth();
     const axiosPublic = useAxiosPublic();
     const navigate = useNavigate();
@@ -15,8 +14,8 @@ const Login = () => {
     const from = location.state?.from?.pathname || "/";
 
     // --- UI STATES ---
-    const [focusedField, setFocusedField] = useState(null); // 'email' or 'password'
-    const [loginStatus, setLoginStatus] = useState('idle'); // idle, loading, success, error
+    const [focusedField, setFocusedField] = useState(null); 
+    const [loginStatus, setLoginStatus] = useState('idle'); 
 
     // Google Login Logic
     const handleGoogleSignIn = () => {
@@ -31,7 +30,14 @@ const Login = () => {
                 axiosPublic.post('/users', userInfo)
                     .then(() => {
                         setLoginStatus('success');
-                        Swal.fire("Welcome!", "Login Successful", "success");
+                        Swal.fire({
+                            title: "Welcome!",
+                            text: "Login Successful",
+                            icon: "success",
+                            background: '#1f2937',
+                            color: '#f9fafb',
+                            confirmButtonColor: '#2563eb'
+                        });
                         navigate(from, { replace: true });
                     });
             })
@@ -41,7 +47,7 @@ const Login = () => {
             });
     };
 
-    // Email Login Logic
+    // Standard Email Login Logic
     const handleLogin = (e) => {
         e.preventDefault();
         setLoginStatus('loading');
@@ -49,6 +55,25 @@ const Login = () => {
         const email = form.email.value;
         const password = form.password.value;
 
+        processLogin(email, password);
+    };
+
+    // ✅ DEMO LOGIN LOGIC
+    const handleDemoLogin = (role) => {
+        setLoginStatus('loading');
+        
+        // (এখানে তোমার ডাটাবেসে থাকা ডেমো অ্যাডমিন ও ইউজারের আসল ইমেইল/পাসওয়ার্ড বসাবে)
+        const email = role === 'admin' ? "assdfd@gmail.com" : "test@gmail.com"; 
+        const password = role === 'admin' ? "123456Joy":"123456"; 
+
+        // একটু ফেক ডিলে (Delay) দিচ্ছি যাতে ইউজার ফিল করতে পারে যে লগইন হচ্ছে
+        setTimeout(() => {
+            processLogin(email, password);
+        }, 800);
+    };
+
+    // Reusable Login Processor
+    const processLogin = (email, password) => {
         signIn(email, password)
             .then(() => {
                 setLoginStatus('success');
@@ -56,7 +81,9 @@ const Login = () => {
                     title: "Access Granted",
                     icon: "success",
                     timer: 1500,
-                    showConfirmButton: false
+                    showConfirmButton: false,
+                    background: '#1f2937',
+                    color: '#f9fafb'
                 });
                 navigate(from, { replace: true });
             })
@@ -65,10 +92,10 @@ const Login = () => {
             });
     };
 
-    // Error Handler (Shake Effect)
+    // Error Handler
     const triggerError = () => {
         setLoginStatus('error');
-        setTimeout(() => setLoginStatus('idle'), 600); // 0.6s পর স্বাভাবিক হবে
+        setTimeout(() => setLoginStatus('idle'), 600); 
     };
 
     return (
@@ -120,7 +147,7 @@ const Login = () => {
                         </div>
                     </div>
 
-                    {/* Password Input (Triggers Lock Animation) */}
+                    {/* Password Input */}
                     <div className="group">
                         <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2 ml-1">Password</label>
                         <div className={`flex items-center bg-gray-900/50 border rounded-xl px-4 py-3 transition-all duration-300 ${
@@ -144,6 +171,7 @@ const Login = () => {
                     </div>
 
                     <button 
+                        type="submit"
                         disabled={loginStatus === 'loading'}
                         className="btn w-full bg-blue-600 hover:bg-blue-700 text-white border-none rounded-xl text-lg font-bold shadow-lg shadow-blue-900/20 transition-all hover:scale-[1.02] mt-4"
                     >
@@ -151,7 +179,27 @@ const Login = () => {
                     </button>
                 </form>
 
-                {/* --- 3. SOCIAL & FOOTER --- */}
+                {/* --- 3. 🚀 DEMO LOGIN BUTTONS --- */}
+                <div className="mt-6 flex gap-3">
+                    <button 
+                        type="button"
+                        onClick={() => handleDemoLogin('admin')}
+                        disabled={loginStatus === 'loading'}
+                        className="btn flex-1 bg-gray-700 hover:bg-gray-600 text-white border-none rounded-xl text-xs sm:text-sm shadow-md"
+                    >
+                        <FaUserSecret className="text-purple-400" /> Admin Demo
+                    </button>
+                    <button 
+                        type="button"
+                        onClick={() => handleDemoLogin('user')}
+                        disabled={loginStatus === 'loading'}
+                        className="btn flex-1 bg-gray-700 hover:bg-gray-600 text-white border-none rounded-xl text-xs sm:text-sm shadow-md"
+                    >
+                        <FaUserTie className="text-green-400" /> User Demo
+                    </button>
+                </div>
+
+                {/* --- 4. SOCIAL & FOOTER --- */}
                 <div className="mt-8">
                     <div className="relative flex py-2 items-center">
                         <div className="flex-grow border-t border-gray-600"></div>
@@ -160,7 +208,9 @@ const Login = () => {
                     </div>
 
                     <button 
+                        type="button"
                         onClick={handleGoogleSignIn} 
+                        disabled={loginStatus === 'loading'}
                         className="btn w-full bg-white hover:bg-gray-100 text-gray-800 border-none rounded-xl mt-4 flex items-center justify-center gap-2 font-bold"
                     >
                         <FcGoogle className="text-xl" /> Google

@@ -1,338 +1,276 @@
 import { useQuery } from "@tanstack/react-query";
 import useAxiosPublic from "../../hooks/useAxiosPublic";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { FaArrowRight, FaCheckCircle, FaMoneyBillWave, FaUserCheck, FaHandHoldingUsd, FaRegStar, FaQuoteLeft, FaInfoCircle } from "react-icons/fa";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import {
+    FaArrowRight, FaMoneyBillWave, FaUserCheck,
+    FaShieldAlt, FaChartLine, FaPaperPlane, FaPlus, FaUniversity, FaUserEdit, FaFingerprint, FaFileContract, FaDropbox
+} from "react-icons/fa";
+import { useRef, useState, useEffect } from "react";
+
+// --- Reusable LL Icon Component ---
+const LLIcon = ({ size = "w-10 h-10", strokeWidth = "8" }) => (
+    <svg viewBox="0 0 100 100" className={`${size} drop-shadow-2xl`}>
+        <defs>
+            <linearGradient id="llGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#22D3EE" />
+                <stop offset="100%" stopColor="#3B82F6" />
+            </linearGradient>
+        </defs>
+        <path d="M 30 15 V 85 H 15 M 15 15 V 85 H 60 Q 65 85 65 80 V 65 H 40 Q 35 65 35 70 V 85" 
+              fill="none" stroke="url(#llGradient)" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
 
 const Home = () => {
     const axiosPublic = useAxiosPublic();
+    const [isCut, setIsCut] = useState(false);
+    const [openFaq, setOpenFaq] = useState(0);
+    const heroRef = useRef(null);
 
-    // --- 1. DATA FETCHING ---
+    useEffect(() => {
+        const timer = setTimeout(() => setIsCut(true), 1800);
+        return () => clearTimeout(timer);
+    }, []);
+
     const { data: loans = [], isLoading } = useQuery({
-        queryKey: ['featured-loans'], 
+        queryKey: ['featured-loans'],
         queryFn: async () => {
             const res = await axiosPublic.get('/loans');
             return res.data;
         }
     });
 
-    const featuredLoans = loans.slice(0, 6);
+    const banks = [
+        "City Bank", "bKash", "BRAC Bank", "National Bank", "Dutch-Bangla Bank", "Islami Bank", "Eastern Bank", "Nagad"
+    ];
 
-    // --- ANIMATION VARIANTS ---
-    const fadeInUp = {
-        hidden: { opacity: 0, y: 60 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
-    };
+    // --- Process Steps Data ---
+    const processSteps = [
+        { icon: <FaUserEdit />, title: "Apply", desc: "Submit your details via encrypted gateway." },
+        { icon: <FaFingerprint />, title: "Verify", desc: "AI protocol performs biometric check." },
+        { icon: <FaFileContract />, title: "Approve", desc: "Digital contract generated instantly." },
+        { icon: <FaDropbox />, title: "Disburse", desc: "Funds transferred to your link-account." }
+    ];
 
-    const staggerContainer = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.2
-            }
-        }
-    };
+    const faqs = [
+        { q: "How fast is the loan approval?", a: "With our AI-Link protocol, most applications are verified within 60 seconds." },
+        { q: "Is my financial data secure?", a: "We use AES-256 bank-grade encryption and decentralized storage for maximum security." },
+        { q: "What is the maximum loan limit?", a: "Limits vary by credit score, but our protocol supports up to $500,000 for verified users." }
+    ];
+
+    const { scrollYProgress } = useScroll();
+    const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
+    const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
     return (
-        // ✅ FIX: Added text-base-content and transition-colors for smooth theme switching
-        <div className="font-sans text-base-content overflow-x-hidden transition-colors duration-300">
+        <div className="min-h-screen bg-base-100 text-base-content overflow-x-hidden selection:bg-primary selection:text-white font-sans">
 
-            {/* --- SECTION 1: HERO BANNER (Fixed Theme) --- */}
-            {/* Hero Section stays dark visually because of the gradient, which looks premium in both modes */}
-            <div className="relative bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 text-white min-h-[85vh] flex items-center overflow-hidden">
+            {/* --- 1. PAGE CUTTER INTRO --- */}
+            <AnimatePresence>
+                {!isCut && (
+                    <div className="fixed inset-0 z-[200] flex pointer-events-none overflow-hidden">
+                        <motion.div exit={{ x: "-100%" }} transition={{ duration: 0.8, ease: [0.77, 0, 0.175, 1], delay: 0.2 }} className="w-1/2 h-full bg-primary relative overflow-hidden">
+                            <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-[100vw] text-center text-white font-[1000] text-[12vw] uppercase italic leading-none tracking-tighter">LoanLink</div>
+                        </motion.div>
+                        <motion.div exit={{ x: "100%" }} transition={{ duration: 0.8, ease: [0.77, 0, 0.175, 1], delay: 0.2 }} className="w-1/2 h-full bg-primary relative overflow-hidden">
+                            <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-[100vw] text-center text-white font-[1000] text-[12vw] uppercase italic leading-none tracking-tighter">LoanLink</div>
+                        </motion.div>
+                        <motion.div initial={{ y: "110vh", x: "-50%" }} animate={{ y: "-110vh" }} transition={{ duration: 2, ease: "easeInOut" }} className="absolute left-1/2 top-0 z-[210] flex flex-col items-center h-full">
+                            <FaPaperPlane className="text-white text-6xl -rotate-45 drop-shadow-2xl mb-1" />
+                            <div className="w-[2px] h-full bg-white/40 shadow-[0_0_15px_white]" />
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            <motion.div initial={{ opacity: 0 }} animate={isCut ? { opacity: 1 } : {}} transition={{ duration: 0.6 }}>
                 
-                {/* Background Shapes */}
-                <motion.div 
-                    animate={{ scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 20, repeat: Infinity }}
-                    className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600 rounded-full mix-blend-multiply filter blur-[100px] opacity-20"
-                />
-                <motion.div 
-                    animate={{ scale: [1, 1.5, 1], x: [0, 50, 0] }}
-                    transition={{ duration: 15, repeat: Infinity }}
-                    className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-600 rounded-full mix-blend-multiply filter blur-[100px] opacity-20"
-                />
-
-                <div className="container mx-auto px-6 relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center pt-20 pb-20">
-                    {/* Left Text */}
-                    <motion.div 
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true }}
-                        variants={staggerContainer}
-                        className="space-y-8"
-                    >
-                        <motion.div variants={fadeInUp} className="inline-block">
-                            <span className="badge badge-accent badge-outline font-bold p-4 text-sm uppercase tracking-widest bg-accent/10">
-                                🚀 Fast & Secure Loans
-                            </span>
-                        </motion.div>
-                        
-                        <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl font-extrabold leading-tight tracking-tight">
-                            Your Dreams, <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Our Priority.</span>
-                        </motion.h1>
-                        
-                        <motion.p variants={fadeInUp} className="text-lg text-gray-300 max-w-lg leading-relaxed">
-                            Experience the hassle-free way to get funded. Low interest rates, instant approval, and zero hidden fees.
-                        </motion.p>
-                        
-                        <motion.div variants={fadeInUp} className="flex flex-wrap gap-4 pt-4">
+                {/* --- 2. HERO SECTION --- */}
+                <motion.section ref={heroRef} style={{ scale: heroScale, opacity: heroOpacity }} className="relative min-h-screen flex items-center justify-center -mt-16 pt-12 overflow-hidden">
+                    <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center z-20">
+                        <div className="text-center lg:text-left lg:col-span-7 order-2 lg:order-1">
+                            <motion.div animate={{ x: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 3 }} className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8 shadow-inner">
+                                <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                                <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Next-Gen AI Lending Protocol</span>
+                            </motion.div>
+                            <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-[1000] leading-[0.85] tracking-tighter uppercase mb-8">Loan<span className="text-primary italic">Link</span></h1>
+                            <p className="text-xl md:text-2xl font-medium max-w-2xl mx-auto lg:mx-0 opacity-70 mb-12 italic">Fastest, most secure, and transparent loan protocol built for the digital age.</p>
                             <Link to="/all-loans">
-                                <button className="btn btn-primary btn-lg rounded-full px-8 shadow-lg shadow-blue-500/30 hover:scale-105 transition-transform border-none bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold h-14 min-w-[180px]">
-                                    Apply Now <FaArrowRight />
-                                </button>
+                                <button className="btn btn-primary btn-lg rounded-2xl px-12 h-16 shadow-2xl hover:scale-105 transition-all font-black uppercase italic tracking-wider">Apply for Funding <FaArrowRight className="ml-3" /></button>
                             </Link>
-                            
-                            <Link to="/about">
-                                <button className="btn btn-outline text-white btn-lg rounded-full px-8 hover:bg-white hover:text-gray-900 hover:scale-105 transition-transform font-bold h-14 min-w-[160px]">
-                                    Learn More <FaInfoCircle />
-                                </button>
-                            </Link>
-                        </motion.div>
-                    </motion.div>
-
-                    {/* Right Image */}
-                    <motion.div 
-                        initial={{ opacity: 0, x: 100 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.8 }}
-                        className="relative hidden md:block"
-                    >
-                        <div className="absolute inset-0 bg-blue-500 rounded-full filter blur-3xl opacity-20 animate-pulse"></div>
-                        <img 
-                            src="https://img.freepik.com/free-vector/digital-wallet-concept-illustration_114360-7561.jpg" 
-                            alt="Loan App" 
-                            className="relative w-full max-w-lg mx-auto drop-shadow-2xl rounded-3xl transform rotate-2 hover:rotate-0 transition-transform duration-500 border-4 border-white/10"
-                        />
-                    </motion.div>
-                </div>
-            </div>
-
-            {/* --- SECTION 2: STATS --- */}
-            <div className="relative z-20 container mx-auto px-4 -mt-16">
-                <motion.div 
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
-                    // ✅ FIX: bg-base-100, divide-base-300, border-base-300
-                    className="bg-base-100 rounded-2xl shadow-xl shadow-blue-900/5 py-8 px-6 md:px-12 border border-base-300 grid grid-cols-2 md:grid-cols-4 divide-x divide-base-300 items-center max-w-6xl mx-auto transition-colors duration-300"
-                >
-                    {[
-                        { icon: <FaUserCheck />, count: "15K+", label: "Happy Users", color: "text-blue-500" },
-                        { icon: <FaMoneyBillWave />, count: "$12M+", label: "Disbursed", color: "text-green-500" },
-                        { icon: <FaHandHoldingUsd />, count: "99%", label: "Approval", color: "text-purple-500" },
-                        { icon: <FaCheckCircle />, count: "24/7", label: "Support", color: "text-orange-500" },
-                    ].map((stat, idx) => (
-                        <div key={idx} className="flex flex-col items-center justify-center gap-2 group p-4">
-                            <div className={`text-4xl ${stat.color} group-hover:-translate-y-2 transition-transform duration-300 drop-shadow-sm`}>
-                                {stat.icon}
-                            </div>
-                            
-                            <div className="text-center">
-                                {/* ✅ FIX: text-base-content */}
-                                <h3 className="text-3xl font-extrabold text-base-content leading-tight">
-                                    {stat.count}
-                                </h3>
-                                <p className="text-[11px] font-bold text-base-content/60 uppercase tracking-widest mt-1 group-hover:text-primary transition-colors">
-                                    {stat.label}
-                                </p>
+                        </div>
+                        <div className="relative flex justify-center lg:col-span-5 order-1 lg:order-2 p-12">
+                            <div className="relative w-[300px] h-[300px] flex items-center justify-center">
+                                <div className="absolute inset-0">
+                                    {[
+                                        { color: "bg-cyan-400", duration: 5 },
+                                        { color: "bg-blue-500", duration: 7 },
+                                        { color: "bg-white", duration: 6 }
+                                    ].map((dot, i) => (
+                                        <motion.div key={i} animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: dot.duration, ease: "linear" }} className="absolute inset-0 flex items-start justify-center">
+                                            <div className={`w-3 h-3 rounded-full ${dot.color} shadow-[0_0_15px_rgba(34,211,238,0.5)] mt-2`} />
+                                        </motion.div>
+                                    ))}
+                                </div>
+                                <motion.div animate={{ y: [0, -15, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="relative z-10 w-full h-full flex items-center justify-center">
+                                    <LLIcon size="w-3/4 h-3/4" strokeWidth="5" />
+                                </motion.div>
                             </div>
                         </div>
-                    ))}
-                </motion.div>
-            </div>
+                    </div>
+                </motion.section>
 
-            {/* --- SECTION 3: AVAILABLE LOANS --- */}
-            <div className="container mx-auto px-6 py-24">
-                <div className="text-center max-w-3xl mx-auto mb-16">
-                    <motion.span 
-                        initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} 
-                        className="text-primary font-bold uppercase tracking-wider text-sm"
-                    >
-                        Our Packages
-                    </motion.span>
-                    <motion.h2 
-                        initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} 
-                        className="text-3xl md:text-4xl font-extrabold text-base-content mt-2"
-                    >
-                        Find the Perfect Loan
-                    </motion.h2>
-                </div>
-
-                {isLoading ? (
-                    <div className="flex justify-center"><span className="loading loading-dots loading-lg text-primary"></span></div>
-                ) : (
+                {/* --- 3. TRUSTED BANK BANNER --- */}
+                <div className="w-full bg-base-200/50 py-12 border-y border-base-content/5 overflow-hidden flex relative group">
                     <motion.div 
-                        variants={staggerContainer}
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true }}
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                        animate={{ x: [0, "-100%"] }}
+                        transition={{ 
+                            repeat: Infinity, 
+                            duration: 30, 
+                            ease: "linear" 
+                        }}
+                        className="flex gap-24 items-center px-12 shrink-0"
                     >
-                        {featuredLoans.map(loan => (
-                            <motion.div 
-                                key={loan._id} 
-                                variants={fadeInUp}
-                                whileHover={{ y: -10 }}
-                                // ✅ FIX: bg-base-100, border-base-300
-                                className="card bg-base-100 shadow-lg hover:shadow-2xl transition-all duration-300 border border-base-300 rounded-3xl overflow-hidden group h-full flex flex-col"
-                            >
-                                <figure className="relative h-56 overflow-hidden flex-shrink-0">
-                                    <img src={loan.image} alt={loan.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                                    {/* ✅ FIX: bg-base-100/90, text-base-content */}
-                                    <div className="absolute top-4 right-4 bg-base-100/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold uppercase text-base-content shadow-sm">
-                                        {loan.category}
-                                    </div>
-                                </figure>
-                                
-                                <div className="card-body p-6 flex-grow flex flex-col">
-                                    <h3 className="text-2xl font-bold text-base-content group-hover:text-primary transition-colors">{loan.title}</h3>
-                                    <p className="text-base-content/70 text-sm mt-2 line-clamp-2 flex-grow">{loan.description}</p>
-                                    
-                                    {/* ✅ FIX: bg-base-200 */}
-                                    <div className="mt-4 p-4 bg-base-200 rounded-2xl flex justify-between items-center transition-colors">
-                                        <div>
-                                            <p className="text-xs text-base-content/60 font-bold uppercase">Max Limit</p>
-                                            <p className="text-lg font-extrabold text-primary">${loan.maxLoanLimit || loan.maxLimit}</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-xs text-base-content/60 font-bold uppercase">Interest</p>
-                                            <p className="text-lg font-extrabold text-base-content">{loan.interest || loan.interestRate}%</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="mt-6">
-                                        <Link to={`/loans/${loan._id}`} className="block w-full">
-                                            <button className="btn btn-outline btn-primary w-full rounded-xl hover:bg-primary hover:text-white font-bold border-2 h-12">
-                                                View Details
-                                            </button>
-                                        </Link>
-                                    </div>
-                                </div>
-                            </motion.div>
+                        {banks.map((bank, i) => (
+                            <div key={`bank-1-${i}`} className="flex items-center gap-5 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all cursor-default">
+                                <FaUniversity className="text-3xl text-primary" />
+                                <span className="text-4xl font-black uppercase italic tracking-tighter">{bank}</span>
+                            </div>
+                        ))}
+                        {banks.map((bank, i) => (
+                            <div key={`bank-2-${i}`} className="flex items-center gap-5 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all cursor-default">
+                                <FaUniversity className="text-3xl text-primary" />
+                                <span className="text-4xl font-black uppercase italic tracking-tighter">{bank}</span>
+                            </div>
                         ))}
                     </motion.div>
-                )}
-            </div>
-
-            {/* --- SECTION 4: HOW IT WORKS --- */}
-            {/* ✅ FIX: bg-base-200 */}
-            <div className="bg-base-200 py-24 relative overflow-hidden transition-colors duration-300">
-                <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/graphy.png')] opacity-5 dark:invert"></div>
-                <div className="container mx-auto px-6 relative z-10">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-extrabold text-base-content">How It Works</h2>
-                        <p className="text-base-content/70 mt-3">Get funded in 3 simple steps.</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-                        <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-1 bg-gradient-to-r from-blue-200 via-purple-200 to-green-200 -z-0 rounded-full opacity-50"></div>
-                        
-                        {[
-                            { step: "01", title: "Apply Online", desc: "Fill out our secure application form in minutes.", color: "border-blue-500 text-blue-500" },
-                            { step: "02", title: "Get Verified", desc: "Our system verifies your details instantly.", color: "border-purple-500 text-purple-500" },
-                            { step: "03", title: "Receive Funds", desc: "Money sent directly to your bank account.", color: "border-green-500 text-green-500" }
-                        ].map((item, idx) => (
-                            <motion.div 
-                                key={idx}
-                                initial={{ opacity: 0, y: 30 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ delay: idx * 0.2 }}
-                                viewport={{ once: true }}
-                                // ✅ FIX: bg-base-100, border-base-300
-                                className="text-center relative z-10 bg-base-100 p-8 rounded-3xl shadow-sm hover:shadow-xl transition-shadow border border-base-300"
-                            >
-                                <div className={`w-20 h-20 bg-base-100 border-4 ${item.color} rounded-full flex items-center justify-center mx-auto shadow-lg mb-6 text-2xl font-extrabold`}>
-                                    {item.step}
-                                </div>
-                                <h3 className="text-xl font-bold text-base-content">{item.title}</h3>
-                                <p className="text-base-content/70 mt-2">{item.desc}</p>
-                            </motion.div>
+                    <motion.div 
+                        animate={{ x: [0, "-100%"] }}
+                        transition={{ 
+                            repeat: Infinity, 
+                            duration: 30, 
+                            ease: "linear" 
+                        }}
+                        className="flex gap-24 items-center px-12 shrink-0"
+                    >
+                        {banks.map((bank, i) => (
+                            <div key={`bank-3-${i}`} className="flex items-center gap-5 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all cursor-default">
+                                <FaUniversity className="text-3xl text-primary" />
+                                <span className="text-4xl font-black uppercase italic tracking-tighter">{bank}</span>
+                            </div>
                         ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* --- SECTION 5: CUSTOMER FEEDBACK --- */}
-            <div className="container mx-auto px-6 py-24">
-                <div className="text-center mb-16">
-                    <h2 className="text-3xl md:text-4xl font-extrabold text-base-content">What Our Clients Say</h2>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {[
-                        { name: "Sarah Johnson", role: "Small Business Owner", review: "LoanLink helped me expand my boutique when no one else would. The process was incredibly fast!" },
-                        { name: "Michael Chen", role: "Freelancer", review: "The low interest rates and flexible repayment options are a lifesaver. Highly recommended!" },
-                        { name: "Emily Davis", role: "Student", review: "Got my education loan approved in just 24 hours. Their support team is amazing." }
-                    ].map((review, idx) => (
-                        <motion.div 
-                            key={idx}
-                            whileHover={{ scale: 1.03 }}
-                            // ✅ FIX: bg-base-100, border-base-300
-                            className="bg-base-100 p-8 rounded-3xl shadow-lg border border-base-300 relative"
-                        >
-                            <FaQuoteLeft className="text-4xl text-primary/20 absolute top-6 left-6" />
-                            <p className="text-base-content/80 italic mt-8 relative z-10 min-h-[80px]">"{review.review}"</p>
-                            <div className="flex items-center gap-1 text-yellow-400 mt-4">
-                                {[...Array(5)].map((_, i) => <FaRegStar key={i} fill="currentColor" />)}
+                        {banks.map((bank, i) => (
+                            <div key={`bank-4-${i}`} className="flex items-center gap-5 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all cursor-default">
+                                <FaUniversity className="text-3xl text-primary" />
+                                <span className="text-4xl font-black uppercase italic tracking-tighter">{bank}</span>
                             </div>
-                            <div className="mt-6 flex items-center gap-4">
-                                <div className="avatar placeholder">
-                                    <div className="bg-neutral text-neutral-content rounded-full w-12">
-                                        <span className="text-lg">{review.name[0]}</span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-base-content">{review.name}</h4>
-                                    <p className="text-xs text-base-content/60">{review.role}</p>
-                                </div>
-                            </div>
-                        </motion.div>
-                    ))}
+                        ))}
+                    </motion.div>
                 </div>
-            </div>
 
-            {/* --- SECTION 6: WHY CHOOSE US --- */}
-            {/* ✅ FIX: bg-neutral text-neutral-content keeps this section cleanly separated regardless of mode */}
-            <div className="bg-neutral text-neutral-content py-24 transition-colors duration-300">
-                <div className="container mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
-                    <div className="md:w-1/2">
-                        <h2 className="text-3xl md:text-4xl font-extrabold mb-6">Why Choose <span className="text-primary">LoanLink?</span></h2>
-                        <p className="text-neutral-content/70 mb-8 text-lg">We combine technology with trust to bring you the best financial services.</p>
-                        <div className="space-y-4">
-                            {["Lowest Interest Rates in the Market", "100% Online Paperless Process", "Instant Disbursement to Bank", "No Pre-payment Penalties"].map((item, i) => (
+                {/* --- 4. NEW SECTION: HOW IT WORKS (THE PROCESS) --- */}
+                <section className="py-40 bg-base-100 relative overflow-hidden">
+                    <div className="container mx-auto px-6 relative z-10">
+                        <div className="text-center mb-24">
+                            <h2 className="text-6xl md:text-8xl font-[1000] uppercase mb-6 tracking-tighter italic leading-none">The <span className="text-primary underline underline-offset-8">Protocol</span></h2>
+                            <p className="text-xl opacity-60 font-medium italic">Seamless transition from application to disbursement.</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
+                            {/* The Animated Connector Line */}
+                            <motion.div 
+                                initial={{ width: 0 }}
+                                whileInView={{ width: "100%" }}
+                                viewport={{ once: false, amount: 0.8 }}
+                                transition={{ duration: 1.5, ease: "easeInOut", delay: 0.5 }}
+                                className="absolute top-[60px] left-0 h-[2px] bg-gradient-to-r from-primary/10 via-primary to-primary/10 hidden lg:block z-0"
+                            />
+
+                            {processSteps.map((step, i) => (
                                 <motion.div 
                                     key={i}
-                                    initial={{ opacity: 0, x: -20 }}
+                                    initial={{ opacity: 0, x: -50 }}
                                     whileInView={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: i * 0.1 }}
-                                    className="flex items-center gap-3"
+                                    viewport={{ once: false, amount: 0.5 }}
+                                    transition={{ duration: 0.8, delay: i * 0.2, ease: [0.16, 1, 0.3, 1] }}
+                                    className="bg-base-200 border border-base-content/5 p-10 rounded-[3rem] text-center group relative z-10 transition-all hover:bg-neutral hover:text-neutral-content group"
                                 >
-                                    <FaCheckCircle className="text-success flex-shrink-0" />
-                                    <span className="font-medium">{item}</span>
+                                    <div className="w-24 h-24 rounded-full bg-base-100 border border-base-content/10 mx-auto mb-10 flex items-center justify-center relative z-20 group-hover:scale-110 group-hover:border-primary transition-all duration-500">
+                                        <div className="text-primary text-5xl transform group-hover:-rotate-12 transition-transform">{step.icon}</div>
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-primary/10 rounded-full blur-2xl z-0 animate-pulse" />
+                                    </div>
+                                    
+                                    <h4 className="text-3xl font-[1000] uppercase mb-4 tracking-tighter group-hover:text-primary">{step.title}</h4>
+                                    <p className="text-sm opacity-70 font-medium leading-relaxed italic">{step.desc}</p>
+                                    
+                                    {/* Number Indicator */}
+                                    <div className="absolute top-8 right-10 text-8xl font-black opacity-[0.03] text-primary select-none">0{i+1}</div>
                                 </motion.div>
                             ))}
                         </div>
-                        <Link to="/all-loans">
-                            <button className="btn btn-primary mt-8 rounded-full px-8 font-bold h-12 shadow-lg hover:shadow-primary/30">Get Started Now</button>
-                        </Link>
                     </div>
-                    <div className="md:w-1/2">
-                         <div className="relative">
-                            <div className="absolute inset-0 bg-primary rounded-full blur-[100px] opacity-20"></div>
-                            <img 
-                                src="https://img.freepik.com/free-vector/investment-data-concept-illustration_114360-5159.jpg" 
-                                alt="Why Choose Us" 
-                                className="relative rounded-3xl shadow-2xl border-4 border-neutral-content/10 w-full"
-                            />
-                         </div>
-                    </div>
-                </div>
-            </div>
+                </section>
 
+                {/* --- 5. LOAN VAULTS --- */}
+                <section className="py-40 bg-base-200/40 mt-10">
+                    <div className="container mx-auto px-6">
+                        <h2 className="text-6xl md:text-8xl font-[1000] uppercase mb-24 tracking-tighter italic">Loan <span className="text-primary underline underline-offset-8">Vaults</span></h2>
+                        {isLoading ? (
+                            <div className="flex justify-center py-20"><span className="loading loading-spinner loading-lg text-primary"></span></div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                                {loans.slice(0, 6).map((loan) => (
+                                    <motion.div key={loan._id} whileHover={{ y: -15 }} className="bg-base-100 rounded-[3.5rem] p-6 shadow-xl border border-base-content/5 group overflow-hidden transition-all">
+                                        <div className="h-64 rounded-[2.8rem] overflow-hidden relative">
+                                            <img src={loan.image} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="" />
+                                        </div>
+                                        <div className="p-6">
+                                            <h3 className="text-2xl font-black uppercase mb-6 truncate">{loan.title}</h3>
+                                            <div className="flex items-center justify-between p-5 bg-base-200 rounded-[2rem]">
+                                                <p className="text-2xl font-black text-primary">{loan.interest || loan.interestRate}%</p>
+                                                <Link to={`/loans/${loan._id}`}>
+                                                    <button className="w-14 h-14 bg-base-content text-base-100 rounded-2xl flex items-center justify-center hover:bg-primary transition-all"><FaArrowRight /></button>
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </section>
+
+                {/* --- 6. FAQ SECTION --- */}
+                <section className="py-40 bg-base-200/40 relative">
+                    <div className="container mx-auto px-6 max-w-4xl">
+                        <div className="text-center mb-24">
+                            <h2 className="text-5xl md:text-7xl font-[1000] uppercase tracking-tighter leading-none mb-6">Common <span className="text-primary italic">Queries</span></h2>
+                            <p className="text-lg opacity-60 font-medium italic">Everything you need to know about LoanLink.</p>
+                        </div>
+                        <div className="space-y-4">
+                            {faqs.map((faq, i) => (
+                                <motion.div key={i} className="bg-base-100 rounded-[2.5rem] border border-base-content/5 overflow-hidden transition-all shadow-lg hover:shadow-primary/5">
+                                    <button onClick={() => setOpenFaq(openFaq === i ? -1 : i)} className="w-full flex items-center justify-between p-8 text-left group">
+                                        <span className="text-xl md:text-2xl font-black uppercase italic tracking-tight">{faq.q}</span>
+                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${openFaq === i ? 'bg-primary text-white rotate-45' : 'bg-base-200'}`}>
+                                            <FaPlus />
+                                        </div>
+                                    </button>
+                                    <AnimatePresence>
+                                        {openFaq === i && (
+                                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3 }}>
+                                                <div className="p-8 pt-0 text-lg opacity-70 font-medium leading-relaxed italic border-t border-base-content/5 mx-8">{faq.a}</div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+            </motion.div>
         </div>
     );
 };

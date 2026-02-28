@@ -50,7 +50,9 @@ const Profile = () => {
         navigator.clipboard.writeText(user?.uid || "N/A");
         Swal.fire({
             icon: 'success', title: 'Copied!', toast: true,
-            position: 'top-end', showConfirmButton: false, timer: 1500
+            position: 'top-end', showConfirmButton: false, timer: 1500,
+            background: 'var(--fallback-b1,oklch(var(--b1)))',
+            color: 'var(--fallback-bc,oklch(var(--bc)))'
         });
     };
 
@@ -80,19 +82,27 @@ const Profile = () => {
                     text: "Profile updated successfully.",
                     icon: "success",
                     timer: 1500,
-                    showConfirmButton: false
+                    showConfirmButton: false,
+                    background: 'var(--fallback-b1,oklch(var(--b1)))',
+                    color: 'var(--fallback-bc,oklch(var(--bc)))'
                 }).then(() => window.location.reload());
             }
         } catch (error) {
-            Swal.fire("Error", "Could not update profile", "error");
+            Swal.fire({
+                title: "Error", 
+                text: "Could not update profile", 
+                icon: "error",
+                background: 'var(--fallback-b1,oklch(var(--b1)))',
+                color: 'var(--fallback-bc,oklch(var(--bc)))'
+            });
         }
     };
 
     return (
-        <div className="w-full min-h-[85vh] flex items-center justify-center bg-base-200 p-4 font-sans">
+        <div className="w-full min-h-[85vh] flex items-center justify-center bg-base-200 p-4 font-sans transition-colors duration-300">
             
             {/* --- Main Profile Card --- */}
-            <div className="card w-full max-w-3xl bg-base-100 shadow-2xl overflow-hidden rounded-3xl border border-white/50">
+            <div className="card w-full max-w-3xl bg-base-100 shadow-2xl overflow-hidden rounded-3xl border border-base-300 transition-colors duration-300">
                 
                 {/* Header Gradient */}
                 <div className="h-48 bg-gradient-to-br from-primary via-purple-600 to-secondary relative overflow-hidden">
@@ -105,9 +115,9 @@ const Profile = () => {
                 <div className="card-body pt-0 relative px-6 md:px-10">
                     
                     {/* Floating Avatar */}
-                    <div className="flex justify-center -mt-24 mb-6">
+                    <div className="flex justify-center -mt-24 mb-6 z-10 relative">
                         <div className="relative">
-                            <div className="avatar online placeholder ring-4 ring-white ring-offset-2 ring-offset-base-100 rounded-full shadow-2xl">
+                            <div className="avatar online placeholder ring-4 ring-base-100 ring-offset-2 ring-offset-base-100 rounded-full shadow-2xl bg-base-100 transition-colors">
                                 <div className="w-44 rounded-full bg-neutral text-neutral-content overflow-hidden">
                                     {user?.photoURL ? (
                                         <img src={user.photoURL} alt="profile" className="object-cover w-full h-full hover:scale-110 transition-transform duration-500" />
@@ -119,17 +129,17 @@ const Profile = () => {
                             {/* Edit Button on Avatar */}
                             <button 
                                 onClick={() => setIsEditModalOpen(true)}
-                                className="absolute bottom-2 right-2 btn btn-circle btn-primary btn-sm border-2 border-white shadow-lg hover:scale-110 transition-transform"
+                                className="absolute bottom-2 right-2 btn btn-circle btn-primary btn-sm border-2 border-base-100 shadow-lg hover:scale-110 transition-transform"
                                 title="Edit Photo"
                             >
-                                <FaCamera />
+                                <FaCamera className="text-white" />
                             </button>
                         </div>
                     </div>
 
                     {/* User Info Section */}
                     <div className="text-center space-y-3 mb-8">
-                        <h2 className="text-4xl font-extrabold text-gray-800 tracking-tight">
+                        <h2 className="text-4xl font-extrabold text-base-content tracking-tight">
                             {user?.displayName}
                         </h2>
                         
@@ -137,8 +147,8 @@ const Profile = () => {
                             <span className={`badge ${getRoleColor(role)} badge-lg uppercase font-bold text-white px-4 py-3 border-none shadow-sm`}>
                                 {role}
                             </span>
-                            <span className="badge badge-ghost badge-lg gap-2 px-4 py-3">
-                                <FaEnvelope className="text-gray-400" /> {user?.email}
+                            <span className="badge badge-ghost badge-lg gap-2 px-4 py-3 font-medium text-base-content/80">
+                                <FaEnvelope className="text-base-content/50" /> {user?.email}
                             </span>
                         </div>
                     </div>
@@ -146,29 +156,29 @@ const Profile = () => {
                     {/* Stats/Info Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
                         {/* User ID Card */}
-                        <div className="p-5 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between group hover:bg-white hover:shadow-lg transition-all duration-300">
+                        <div className="p-5 rounded-2xl bg-base-200 border border-base-300 flex items-center justify-between group hover:bg-base-300 hover:shadow-lg transition-all duration-300">
                             <div className="flex items-center gap-4">
-                                <div className="p-3 bg-blue-100 text-blue-600 rounded-xl">
+                                <div className="p-3 bg-info/20 text-info rounded-xl">
                                     <FaFingerprint size={22} />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">User ID</p>
-                                    <p className="text-sm font-mono font-bold text-gray-700 truncate w-32">{user?.uid}</p>
+                                    <p className="text-xs text-base-content/50 font-bold uppercase tracking-wider">User ID</p>
+                                    <p className="text-sm font-mono font-bold text-base-content truncate w-32">{user?.uid}</p>
                                 </div>
                             </div>
-                            <button onClick={handleCopyId} className="btn btn-ghost btn-circle btn-sm text-gray-400 group-hover:text-primary tooltip tooltip-left" data-tip="Copy ID">
+                            <button onClick={handleCopyId} className="btn btn-ghost btn-circle btn-sm text-base-content/50 group-hover:text-primary tooltip tooltip-left" data-tip="Copy ID">
                                 <FaCopy />
                             </button>
                         </div>
 
                         {/* Status Card */}
-                        <div className="p-5 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between group hover:bg-white hover:shadow-lg transition-all duration-300">
+                        <div className="p-5 rounded-2xl bg-base-200 border border-base-300 flex items-center justify-between group hover:bg-base-300 hover:shadow-lg transition-all duration-300">
                             <div className="flex items-center gap-4">
-                                <div className="p-3 bg-green-100 text-green-600 rounded-xl">
+                                <div className="p-3 bg-success/20 text-success rounded-xl">
                                     <FaIdBadge size={22} />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Account Status</p>
+                                    <p className="text-xs text-base-content/50 font-bold uppercase tracking-wider">Account Status</p>
                                     <p className="text-sm font-bold text-success flex items-center gap-1">Verified <span className="text-xs">✅</span></p>
                                 </div>
                             </div>
@@ -176,17 +186,17 @@ const Profile = () => {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-col sm:flex-row justify-center gap-4 border-t border-gray-100 pt-8">
+                    <div className="flex flex-col sm:flex-row justify-center gap-4 border-t border-base-300 pt-8">
                         <button 
                             onClick={() => setIsEditModalOpen(true)}
-                            className="btn btn-primary btn-wide rounded-full shadow-lg shadow-primary/30 hover:scale-105 transition-transform"
+                            className="btn btn-primary btn-wide rounded-full shadow-lg shadow-primary/30 hover:scale-105 transition-transform text-white border-none"
                         >
                             <FaEdit /> Edit Profile
                         </button>
                         
                         <button 
                             onClick={handleLogout} 
-                            className="btn btn-outline btn-error btn-wide rounded-full hover:shadow-lg hover:shadow-red-200 hover:scale-105 transition-transform"
+                            className="btn btn-outline btn-error btn-wide rounded-full hover:shadow-lg hover:shadow-error/30 hover:scale-105 transition-transform"
                         >
                             <FaSignOutAlt /> Logout
                         </button>
@@ -197,7 +207,7 @@ const Profile = () => {
             {/* --- PREMIUM EDIT MODAL --- */}
             {isEditModalOpen && (
                 <dialog className="modal modal-bottom sm:modal-middle backdrop-blur-sm" open>
-                    <div className="modal-box p-0 rounded-3xl overflow-hidden max-w-md shadow-2xl">
+                    <div className="modal-box p-0 rounded-3xl overflow-hidden max-w-md shadow-2xl bg-base-100 border border-base-300 transition-colors">
                         
                         {/* Modal Header */}
                         <div className="bg-primary p-6 text-white text-center relative">
@@ -209,12 +219,12 @@ const Profile = () => {
                         </div>
 
                         {/* Modal Body */}
-                        <form onSubmit={handleUpdateProfile} className="p-8 space-y-6 bg-white">
+                        <form onSubmit={handleUpdateProfile} className="p-8 space-y-6">
                             
                             {/* Live Preview Circle */}
                             <div className="flex justify-center">
                                 <div className="avatar">
-                                    <div className="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                                    <div className="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 bg-base-200">
                                         <img src={photoInput || "https://i.ibb.co/hYsm3PL/user.png"} alt="Preview" className="object-cover" />
                                     </div>
                                 </div>
@@ -222,9 +232,9 @@ const Profile = () => {
 
                             {/* Name Input */}
                             <div className="form-control">
-                                <label className="label font-bold text-gray-700">Full Name</label>
-                                <label className="input input-bordered flex items-center gap-2 rounded-xl focus-within:ring-2 ring-primary/50 bg-gray-50">
-                                    <FaUserEdit className="text-gray-400" />
+                                <label className="label font-bold text-base-content">Full Name</label>
+                                <label className="input input-bordered flex items-center gap-2 rounded-xl focus-within:ring-2 ring-primary/50 bg-base-200 focus-within:bg-base-100 transition-colors text-base-content">
+                                    <FaUserEdit className="text-base-content/50" />
                                     <input 
                                         type="text" 
                                         className="grow bg-transparent" 
@@ -238,9 +248,9 @@ const Profile = () => {
 
                             {/* Photo URL Input */}
                             <div className="form-control">
-                                <label className="label font-bold text-gray-700">Photo URL</label>
-                                <label className="input input-bordered flex items-center gap-2 rounded-xl focus-within:ring-2 ring-primary/50 bg-gray-50">
-                                    <FaLink className="text-gray-400" />
+                                <label className="label font-bold text-base-content">Photo URL</label>
+                                <label className="input input-bordered flex items-center gap-2 rounded-xl focus-within:ring-2 ring-primary/50 bg-base-200 focus-within:bg-base-100 transition-colors text-base-content">
+                                    <FaLink className="text-base-content/50" />
                                     <input 
                                         type="url" 
                                         className="grow bg-transparent" 
@@ -251,7 +261,7 @@ const Profile = () => {
                                     />
                                 </label>
                                 <label className="label">
-                                    <span className="label-text-alt text-gray-400">Paste a direct image link to update avatar</span>
+                                    <span className="label-text-alt text-base-content/50">Paste a direct image link to update avatar</span>
                                 </label>
                             </div>
 
@@ -260,11 +270,11 @@ const Profile = () => {
                                 <button 
                                     type="button" 
                                     onClick={() => setIsEditModalOpen(false)} 
-                                    className="btn btn-ghost flex-1 rounded-xl"
+                                    className="btn btn-ghost flex-1 rounded-xl text-base-content"
                                 >
                                     Cancel
                                 </button>
-                                <button type="submit" className="btn btn-primary flex-1 rounded-xl shadow-md">
+                                <button type="submit" className="btn btn-primary flex-1 rounded-xl shadow-md text-white border-none">
                                     <FaSave /> Save Changes
                                 </button>
                             </div>

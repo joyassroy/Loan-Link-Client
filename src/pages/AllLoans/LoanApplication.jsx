@@ -52,7 +52,13 @@ const LoanApplication = () => {
             Swal.fire({
                 title: "Limit Exceeded!",
                 text: `You cannot apply for more than $${maxLimit}`,
-                icon: "error"
+                icon: "error",
+                background: "inherit",
+                color: "inherit",
+                customClass: {
+                    popup: "bg-base-100 text-base-content border border-base-300 rounded-3xl shadow-2xl",
+                    confirmButton: "btn btn-error rounded-xl px-8 text-white"
+                }
             });
             return;
         }
@@ -89,7 +95,12 @@ const LoanApplication = () => {
                         text: `Your application for $${amount} has been submitted successfully.`,
                         icon: "success",
                         timer: 3000,
-                        showConfirmButton: false
+                        showConfirmButton: false,
+                        background: "inherit",
+                        color: "inherit",
+                        customClass: {
+                            popup: "bg-base-100 text-base-content border border-base-300 rounded-3xl shadow-2xl"
+                        }
                     }).then(() => {
                         setShowConfetti(false);
                         navigate('/dashboard/my-loans');
@@ -97,14 +108,24 @@ const LoanApplication = () => {
                 }, 1000);
             }
         } catch (error) {
-            Swal.fire("Error", error.message, "error");
+            Swal.fire({
+                title: "Error",
+                text: error.message,
+                icon: "error",
+                background: "inherit",
+                color: "inherit",
+                customClass: {
+                    popup: "bg-base-100 text-base-content border border-base-300 rounded-3xl shadow-2xl",
+                    confirmButton: "btn btn-error rounded-xl px-8 text-white"
+                }
+            });
         }
     };
 
-    if (isLoading) return <div className="flex justify-center h-screen items-center"><span className="loading loading-bars loading-lg text-primary"></span></div>;
+    if (isLoading) return <div className="flex justify-center h-screen items-center bg-base-200"><span className="loading loading-bars loading-lg text-primary"></span></div>;
 
     return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 font-sans relative overflow-hidden">
+        <div className="min-h-screen bg-base-200 flex items-center justify-center py-12 px-4 font-sans relative overflow-hidden transition-colors duration-300">
             
             {/* 🎉 Confetti Component */}
             {showConfetti && (
@@ -113,9 +134,9 @@ const LoanApplication = () => {
                 </div>
             )}
 
-            <div className="card w-full max-w-5xl bg-white shadow-2xl rounded-[2.5rem] overflow-hidden z-10 border border-gray-100">
+            <div className="card w-full max-w-5xl bg-base-100 shadow-2xl rounded-[2.5rem] overflow-hidden z-10 border border-base-300 transition-colors duration-300">
                 
-                {/* Header Section */}
+                {/* Header Section (Kept Dark & Premium for both modes) */}
                 <div className="bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 p-12 text-white text-center relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
                     <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-purple-500 rounded-full blur-[80px] opacity-40"></div>
@@ -140,25 +161,25 @@ const LoanApplication = () => {
                 <form onSubmit={handleApply} className="card-body p-8 md:p-12 space-y-10">
                     
                     {/* --- 1. VERIFIED INFO --- */}
-                    <div className="bg-blue-50/40 p-6 rounded-3xl border border-blue-100/50">
-                        <h3 className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-5 flex items-center gap-2">
+                    <div className="bg-info/10 p-6 rounded-3xl border border-info/20">
+                        <h3 className="text-xs font-bold text-info uppercase tracking-widest mb-5 flex items-center gap-2">
                             <FaUserTag /> Verified Applicant Info
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="p-4 bg-white rounded-2xl border border-blue-50 shadow-sm flex flex-col justify-center">
-                                <label className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Email Address</label>
-                                <div className="flex items-center gap-2 font-bold text-gray-700 mt-1 truncate text-sm">
-                                    <FaUser className="text-blue-400" /> {user?.email}
+                            <div className="p-4 bg-base-100 rounded-2xl border border-base-300 shadow-sm flex flex-col justify-center transition-colors">
+                                <label className="text-[10px] text-base-content/50 uppercase font-bold tracking-wider">Email Address</label>
+                                <div className="flex items-center gap-2 font-bold text-base-content mt-1 truncate text-sm">
+                                    <FaUser className="text-info" /> {user?.email}
                                 </div>
                             </div>
-                            <div className="p-4 bg-white rounded-2xl border border-blue-50 shadow-sm flex flex-col justify-center">
-                                <label className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Category</label>
-                                <div className="font-bold text-gray-700 mt-1 capitalize text-sm">{loan.category}</div>
+                            <div className="p-4 bg-base-100 rounded-2xl border border-base-300 shadow-sm flex flex-col justify-center transition-colors">
+                                <label className="text-[10px] text-base-content/50 uppercase font-bold tracking-wider">Category</label>
+                                <div className="font-bold text-base-content mt-1 capitalize text-sm">{loan.category}</div>
                             </div>
-                            <div className="p-4 bg-white rounded-2xl border border-blue-50 shadow-sm flex flex-col justify-center">
-                                <label className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Interest Rate</label>
-                                <div className="flex items-center gap-2 font-bold text-gray-700 mt-1 text-sm">
-                                    <FaPercentage className="text-blue-400" /> {loan.interestRate || loan.interest}%
+                            <div className="p-4 bg-base-100 rounded-2xl border border-base-300 shadow-sm flex flex-col justify-center transition-colors">
+                                <label className="text-[10px] text-base-content/50 uppercase font-bold tracking-wider">Interest Rate</label>
+                                <div className="flex items-center gap-2 font-bold text-base-content mt-1 text-sm">
+                                    <FaPercentage className="text-info" /> {loan.interestRate || loan.interest}%
                                 </div>
                             </div>
                         </div>
@@ -169,52 +190,52 @@ const LoanApplication = () => {
                         
                         {/* Left Column: Personal */}
                         <div className="space-y-6">
-                            <div className="flex items-center gap-3 border-b border-gray-100 pb-2">
-                                <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm">1</div>
-                                <h3 className="text-lg font-bold text-gray-800">Personal Details</h3>
+                            <div className="flex items-center gap-3 border-b border-base-300 pb-2">
+                                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">1</div>
+                                <h3 className="text-lg font-bold text-base-content">Personal Details</h3>
                             </div>
                             
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="form-control">
-                                    <label className="label font-bold text-gray-600 text-xs uppercase">First Name</label>
-                                    <input type="text" name="firstName" placeholder="John" className="input input-bordered w-full bg-gray-50 focus:bg-white focus:ring-2 ring-indigo-100 rounded-xl transition-all" required />
+                                    <label className="label font-bold text-base-content/70 text-xs uppercase">First Name</label>
+                                    <input type="text" name="firstName" placeholder="John" className="input input-bordered w-full bg-base-200 focus:bg-base-100 focus:ring-2 ring-primary/20 rounded-xl transition-all text-base-content" required />
                                 </div>
                                 <div className="form-control">
-                                    <label className="label font-bold text-gray-600 text-xs uppercase">Last Name</label>
-                                    <input type="text" name="lastName" placeholder="Doe" className="input input-bordered w-full bg-gray-50 focus:bg-white focus:ring-2 ring-indigo-100 rounded-xl transition-all" required />
+                                    <label className="label font-bold text-base-content/70 text-xs uppercase">Last Name</label>
+                                    <input type="text" name="lastName" placeholder="Doe" className="input input-bordered w-full bg-base-200 focus:bg-base-100 focus:ring-2 ring-primary/20 rounded-xl transition-all text-base-content" required />
                                 </div>
                             </div>
 
                             <div className="form-control">
-                                <label className="label font-bold text-gray-600 text-xs uppercase">Contact Number</label>
+                                <label className="label font-bold text-base-content/70 text-xs uppercase">Contact Number</label>
                                 <div className="relative">
-                                    <FaPhone className="absolute top-1/2 -translate-y-1/2 left-4 text-gray-400" />
-                                    <input type="tel" name="phone" placeholder="+880 17..." className="input input-bordered w-full pl-10 bg-gray-50 focus:bg-white focus:ring-2 ring-indigo-100 rounded-xl transition-all" required />
+                                    <FaPhone className="absolute top-1/2 -translate-y-1/2 left-4 text-base-content/40" />
+                                    <input type="tel" name="phone" placeholder="+880 17..." className="input input-bordered w-full pl-10 bg-base-200 focus:bg-base-100 focus:ring-2 ring-primary/20 rounded-xl transition-all text-base-content" required />
                                 </div>
                             </div>
 
                             <div className="form-control">
-                                <label className="label font-bold text-gray-600 text-xs uppercase">NID / Passport</label>
+                                <label className="label font-bold text-base-content/70 text-xs uppercase">NID / Passport</label>
                                 <div className="relative">
-                                    <FaIdCard className="absolute top-1/2 -translate-y-1/2 left-4 text-gray-400" />
-                                    <input type="text" name="nationalID" placeholder="ID Number" className="input input-bordered w-full pl-10 bg-gray-50 focus:bg-white focus:ring-2 ring-indigo-100 rounded-xl transition-all" required />
+                                    <FaIdCard className="absolute top-1/2 -translate-y-1/2 left-4 text-base-content/40" />
+                                    <input type="text" name="nationalID" placeholder="ID Number" className="input input-bordered w-full pl-10 bg-base-200 focus:bg-base-100 focus:ring-2 ring-primary/20 rounded-xl transition-all text-base-content" required />
                                 </div>
                             </div>
                         </div>
 
                         {/* Right Column: Financial */}
                         <div className="space-y-6">
-                            <div className="flex items-center gap-3 border-b border-gray-100 pb-2">
-                                <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-sm">2</div>
-                                <h3 className="text-lg font-bold text-gray-800">Financial Info</h3>
+                            <div className="flex items-center gap-3 border-b border-base-300 pb-2">
+                                <div className="w-8 h-8 rounded-full bg-success/20 flex items-center justify-center text-success font-bold text-sm">2</div>
+                                <h3 className="text-lg font-bold text-base-content">Financial Info</h3>
                             </div>
 
                             <div className="form-control">
-                                <label className="label font-bold text-gray-600 text-xs uppercase">Income Source</label>
+                                <label className="label font-bold text-base-content/70 text-xs uppercase">Income Source</label>
                                 <div className="relative">
-                                    <FaBriefcase className="absolute top-1/2 -translate-y-1/2 left-4 text-gray-400" />
-                                    <select name="incomeSource" className="select select-bordered w-full pl-10 bg-gray-50 focus:bg-white focus:ring-2 ring-green-100 rounded-xl transition-all cursor-pointer" required>
-                                        <option value="" disabled selected>Select Source</option>
+                                    <FaBriefcase className="absolute top-1/2 -translate-y-1/2 left-4 text-base-content/40" />
+                                    <select name="incomeSource" className="select select-bordered w-full pl-10 bg-base-200 focus:bg-base-100 focus:ring-2 ring-success/20 rounded-xl transition-all cursor-pointer text-base-content" required defaultValue="">
+                                        <option value="" disabled>Select Source</option>
                                         <option value="Salary">Job / Salary</option>
                                         <option value="Business">Business</option>
                                         <option value="Freelancing">Freelancing</option>
@@ -224,24 +245,24 @@ const LoanApplication = () => {
                             </div>
 
                             <div className="form-control">
-                                <label className="label font-bold text-gray-600 text-xs uppercase">Monthly Income</label>
+                                <label className="label font-bold text-base-content/70 text-xs uppercase">Monthly Income</label>
                                 <div className="relative">
-                                    <FaDollarSign className="absolute top-1/2 -translate-y-1/2 left-4 text-gray-400" />
-                                    <input type="number" name="monthlyIncome" placeholder="5000" className="input input-bordered w-full pl-10 bg-gray-50 focus:bg-white focus:ring-2 ring-green-100 rounded-xl transition-all" required />
+                                    <FaDollarSign className="absolute top-1/2 -translate-y-1/2 left-4 text-base-content/40" />
+                                    <input type="number" name="monthlyIncome" placeholder="5000" className="input input-bordered w-full pl-10 bg-base-200 focus:bg-base-100 focus:ring-2 ring-success/20 rounded-xl transition-all text-base-content" required />
                                 </div>
                             </div>
 
                             <div className="form-control pt-2">
-                                <label className="label font-bold text-gray-800 text-sm mb-1">Desired Loan Amount (USD) <span className="text-red-500">*</span></label>
+                                <label className="label font-bold text-base-content text-sm mb-1">Desired Loan Amount (USD) <span className="text-error">*</span></label>
                                 <div className="relative group">
                                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <FaDollarSign className="text-green-600 text-xl group-focus-within:scale-125 transition-transform" />
+                                        <FaDollarSign className="text-success text-xl group-focus-within:scale-125 transition-transform" />
                                     </div>
                                     <input 
                                         type="number" 
                                         name="amount" 
                                         placeholder={`Max: ${loan.maxLoanLimit || loan.maxLimit}`} 
-                                        className="input input-bordered w-full pl-10 h-14 text-xl font-bold text-gray-800 bg-white border-2 border-gray-200 focus:border-green-500 rounded-xl focus:ring-4 ring-green-500/10 transition-all shadow-sm" 
+                                        className="input input-bordered w-full pl-10 h-14 text-xl font-bold text-base-content bg-base-100 border-2 border-base-300 focus:border-success rounded-xl focus:ring-4 ring-success/10 transition-all shadow-sm" 
                                         max={loan.maxLoanLimit || loan.maxLimit}
                                         required 
                                     />
@@ -251,22 +272,22 @@ const LoanApplication = () => {
                     </div>
 
                     {/* --- 3. BOTTOM SECTION (Improved Classy Look) --- */}
-                    <div className="bg-gray-50/50 p-8 rounded-[2rem] border border-gray-200/60 shadow-inner">
+                    <div className="bg-base-200/50 p-8 rounded-[2rem] border border-base-300 shadow-inner">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-sm">3</div>
-                            <h3 className="text-lg font-bold text-gray-800">Final Details</h3>
+                            <div className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center text-secondary font-bold text-sm">3</div>
+                            <h3 className="text-lg font-bold text-base-content">Final Details</h3>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             
                             {/* Reason for Loan */}
                             <div className="form-control md:col-span-1">
-                                <label className="label font-bold text-gray-600 text-xs uppercase tracking-wider mb-1">Reason for Loan <span className="text-red-500">*</span></label>
+                                <label className="label font-bold text-base-content/70 text-xs uppercase tracking-wider mb-1">Reason for Loan <span className="text-error">*</span></label>
                                 <div className="relative">
-                                    <FaPenNib className="absolute top-5 left-5 text-gray-400" />
+                                    <FaPenNib className="absolute top-5 left-5 text-base-content/40" />
                                     <textarea 
                                         name="reason" 
-                                        className="textarea textarea-bordered w-full h-32 pl-12 pt-4 bg-white focus:bg-white border-gray-300 focus:border-purple-500 focus:ring-4 ring-purple-500/10 rounded-2xl transition-all text-base resize-none shadow-sm" 
+                                        className="textarea textarea-bordered w-full h-32 pl-12 pt-4 bg-base-100 focus:bg-base-200 border-base-300 focus:border-secondary focus:ring-4 ring-secondary/10 rounded-2xl transition-all text-base resize-none shadow-sm text-base-content" 
                                         placeholder="Please describe why you need this loan in detail..." 
                                         required
                                     ></textarea>
@@ -275,12 +296,12 @@ const LoanApplication = () => {
 
                             {/* Address */}
                             <div className="form-control md:col-span-1">
-                                <label className="label font-bold text-gray-600 text-xs uppercase tracking-wider mb-1">Present Address <span className="text-red-500">*</span></label>
+                                <label className="label font-bold text-base-content/70 text-xs uppercase tracking-wider mb-1">Present Address <span className="text-error">*</span></label>
                                 <div className="relative">
-                                    <FaMapMarkerAlt className="absolute top-5 left-5 text-gray-400" />
+                                    <FaMapMarkerAlt className="absolute top-5 left-5 text-base-content/40" />
                                     <textarea 
                                         name="address" 
-                                        className="textarea textarea-bordered w-full h-32 pl-12 pt-4 bg-white focus:bg-white border-gray-300 focus:border-purple-500 focus:ring-4 ring-purple-500/10 rounded-2xl transition-all text-base resize-none shadow-sm" 
+                                        className="textarea textarea-bordered w-full h-32 pl-12 pt-4 bg-base-100 focus:bg-base-200 border-base-300 focus:border-secondary focus:ring-4 ring-secondary/10 rounded-2xl transition-all text-base resize-none shadow-sm text-base-content" 
                                         placeholder="Your full present address (Street, City, Zip Code)..." 
                                         required
                                     ></textarea>
@@ -289,12 +310,12 @@ const LoanApplication = () => {
 
                             {/* Extra Notes (Full Width) */}
                             <div className="form-control md:col-span-2">
-                                <label className="label font-bold text-gray-600 text-xs uppercase tracking-wider mb-1">Extra Notes (Optional)</label>
+                                <label className="label font-bold text-base-content/70 text-xs uppercase tracking-wider mb-1">Extra Notes (Optional)</label>
                                 <div className="relative">
-                                    <FaStickyNote className="absolute top-5 left-5 text-gray-400" />
+                                    <FaStickyNote className="absolute top-5 left-5 text-base-content/40" />
                                     <textarea 
                                         name="notes" 
-                                        className="textarea textarea-bordered w-full h-24 pl-12 pt-4 bg-white focus:bg-white border-gray-300 focus:border-purple-500 focus:ring-4 ring-purple-500/10 rounded-2xl transition-all text-base resize-none shadow-sm" 
+                                        className="textarea textarea-bordered w-full h-24 pl-12 pt-4 bg-base-100 focus:bg-base-200 border-base-300 focus:border-secondary focus:ring-4 ring-secondary/10 rounded-2xl transition-all text-base resize-none shadow-sm text-base-content" 
                                         placeholder="Any additional information you want to share with the manager..."
                                     ></textarea>
                                 </div>
@@ -304,7 +325,7 @@ const LoanApplication = () => {
 
                     {/* Submit Button */}
                     <div className="form-control pt-4">
-                        <button className="btn btn-primary w-full h-16 rounded-2xl text-xl font-bold shadow-2xl shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-1 transition-all bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-700 border-none relative overflow-hidden group">
+                        <button className="btn btn-primary w-full h-16 rounded-2xl text-xl font-bold shadow-2xl shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-1 transition-all bg-gradient-to-r from-primary via-primary/80 to-secondary border-none relative overflow-hidden group text-white">
                             <span className="relative z-10 flex items-center justify-center gap-3">
                                 <FaPaperPlane className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" /> 
                                 Submit Application

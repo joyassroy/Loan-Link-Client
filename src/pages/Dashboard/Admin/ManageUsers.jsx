@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import Swal from "sweetalert2";
 import { useState } from "react";
+import { FaUserShield, FaUserTie, FaBan, FaUsersCog } from "react-icons/fa";
 
 const ManageUsers = () => {
     const axiosSecure = useAxiosSecure();
@@ -23,16 +24,28 @@ const ManageUsers = () => {
             text: "They will gain higher privileges.",
             icon: "warning",
             showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Yes, Update Role!"
+            confirmButtonText: "Yes, Update Role!",
+            background: "inherit",
+            color: "inherit",
+            customClass: {
+                popup: "bg-base-100 text-base-content border border-base-300 rounded-3xl shadow-2xl",
+                confirmButton: "btn btn-primary text-white",
+                cancelButton: "btn btn-error text-white"
+            }
         }).then((result) => {
             if (result.isConfirmed) {
                 axiosSecure.patch(`/users/admin/${user._id}`, { role: role })
                     .then(res => {
                         if (res.data.modifiedCount > 0) {
                             refetch();
-                            Swal.fire("Success", `${user.name} is now a ${role}!`, "success");
+                            Swal.fire({
+                                title: "Success", 
+                                text: `${user.name} is now a ${role}!`, 
+                                icon: "success",
+                                background: "inherit",
+                                color: "inherit",
+                                customClass: { popup: "bg-base-100 text-base-content border border-base-300 rounded-3xl" }
+                            });
                         }
                     });
             }
@@ -45,78 +58,107 @@ const ManageUsers = () => {
         const form = event.target;
         const reason = form.reason.value;
 
-        // Send reason to backend (backend code handles saving 'reason' if you updated the schema)
+        // Send reason to backend
         axiosSecure.patch(`/users/admin/${selectedUser._id}`, { role: 'suspended', reason: reason })
             .then(res => {
                 if (res.data.modifiedCount > 0) {
                     refetch();
                     document.getElementById('suspend_modal').close();
-                    Swal.fire("Suspended", `${selectedUser.name} has been suspended.`, "warning");
+                    Swal.fire({
+                        title: "Suspended", 
+                        text: `${selectedUser.name} has been suspended.`, 
+                        icon: "warning",
+                        background: "inherit",
+                        color: "inherit",
+                        customClass: { popup: "bg-base-100 text-base-content border border-base-300 rounded-3xl" }
+                    });
                 }
             });
     };
 
     return (
-        <div>
-            <div className="flex justify-between items-center my-4 p-4 bg-base-100 rounded-lg shadow">
-                <h2 className="text-3xl font-bold">Manage Users</h2>
-                <h2 className="text-xl font-semibold">Total Users: {users.length}</h2>
+        <div className="p-6 bg-base-200 min-h-screen font-sans transition-colors duration-300 pb-20">
+            
+            {/* Header */}
+            <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                <div>
+                    <h2 className="text-3xl font-extrabold text-base-content flex items-center gap-3">
+                        <FaUsersCog className="text-primary" /> Manage Users
+                    </h2>
+                    <p className="text-base-content/60 text-sm mt-1 font-medium">Control roles and access permissions</p>
+                </div>
+                <div className="bg-base-100 px-6 py-3 rounded-2xl shadow-sm border border-base-300 font-bold text-base-content transition-colors">
+                    Total Users: <span className="text-primary text-xl ml-2">{users.length}</span>
+                </div>
             </div>
 
-            <div className="overflow-x-auto bg-base-100 rounded-lg shadow">
+            {/* Table */}
+            <div className="overflow-x-auto bg-base-100 rounded-2xl shadow-xl border border-base-300 transition-colors">
                 <table className="table w-full">
                     {/* head */}
-                    <thead className="bg-gray-200">
+                    <thead className="bg-base-200 text-base-content/70 uppercase text-xs font-bold border-b border-base-300">
                         <tr>
                             <th>#</th>
-                            <th>Name</th>
-                            <th>Email</th>
+                            <th>User Info</th>
                             <th>Current Role</th>
                             <th className="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {users.map((user, index) => (
-                            <tr key={user._id} className="hover">
-                                <th>{index + 1}</th>
-                                <td>{user.name}</td>
-                                <td>{user.email}</td>
+                            <tr key={user._id} className="hover:bg-base-200/50 transition-colors border-b border-base-300/50">
+                                <th className="text-base-content/70">{index + 1}</th>
                                 <td>
-                                    {user.role === 'admin' ? <div className="badge badge-primary font-bold">Admin</div> : 
-                                     user.role === 'manager' ? <div className="badge badge-secondary font-bold">Manager</div> : 
-                                     user.role === 'suspended' ? <div className="badge badge-error font-bold text-white">Suspended</div> : 
-                                     <div className="badge badge-ghost">Borrower</div>}
+                                    <div className="flex items-center gap-3">
+                                        <div className="avatar placeholder">
+                                            <div className="bg-primary/20 text-primary rounded-full w-10 font-bold flex items-center justify-center">
+                                                <span>{user.name?.slice(0,1).toUpperCase()}</span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-base-content">{user.name}</div>
+                                            <div className="text-xs text-base-content/50">{user.email}</div>
+                                        </div>
+                                    </div>
                                 </td>
-                                <td className="flex justify-center gap-2">
-                                    {/* Make Admin Button */}
-                                    {user.role !== 'admin' && user.role !== 'suspended' &&
-                                        <button 
-                                            onClick={() => handleMakeRole(user, 'admin')} 
-                                            className="btn btn-xs btn-primary tooltip"
-                                            data-tip="Promote to Admin"
-                                        >
-                                            Admin
-                                        </button>}
-                                    
-                                    {/* Make Manager Button */}
-                                    {user.role !== 'manager' && user.role !== 'suspended' &&
-                                        <button 
-                                            onClick={() => handleMakeRole(user, 'manager')} 
-                                            className="btn btn-xs btn-secondary tooltip"
-                                            data-tip="Promote to Manager"
-                                        >
-                                            Manager
-                                        </button>}
-                                    
-                                    {/* Suspend Button (Challenge) */}
-                                    {user.role !== 'suspended' && user.role !== 'admin' &&
-                                        <button 
-                                            onClick={() => { setSelectedUser(user); document.getElementById('suspend_modal').showModal(); }} 
-                                            className="btn btn-xs btn-error text-white tooltip"
-                                            data-tip="Suspend User"
-                                        >
-                                            Suspend
-                                        </button>}
+                                <td>
+                                    {user.role === 'admin' ? <div className="badge badge-primary font-bold shadow-sm border-none gap-1"><FaUserShield/> Admin</div> : 
+                                     user.role === 'manager' ? <div className="badge badge-secondary font-bold shadow-sm border-none gap-1"><FaUserTie/> Manager</div> : 
+                                     user.role === 'suspended' ? <div className="badge badge-error font-bold text-white shadow-sm border-none gap-1"><FaBan/> Suspended</div> : 
+                                     <div className="badge badge-ghost font-bold text-base-content/80 border-base-300">Borrower</div>}
+                                </td>
+                                <td className="text-center">
+                                    <div className="flex justify-center gap-2 flex-wrap">
+                                        {/* Make Admin Button */}
+                                        {user.role !== 'admin' && user.role !== 'suspended' &&
+                                            <button 
+                                                onClick={() => handleMakeRole(user, 'admin')} 
+                                                className="btn btn-sm btn-ghost text-primary bg-primary/10 hover:bg-primary/20 rounded-lg tooltip"
+                                                data-tip="Promote to Admin"
+                                            >
+                                                Admin
+                                            </button>}
+                                        
+                                        {/* Make Manager Button */}
+                                        {user.role !== 'manager' && user.role !== 'suspended' &&
+                                            <button 
+                                                onClick={() => handleMakeRole(user, 'manager')} 
+                                                className="btn btn-sm btn-ghost text-secondary bg-secondary/10 hover:bg-secondary/20 rounded-lg tooltip"
+                                                data-tip="Promote to Manager"
+                                            >
+                                                Manager
+                                            </button>}
+                                        
+                                        {/* Suspend Button (Challenge) */}
+                                        {user.role !== 'suspended' && user.role !== 'admin' &&
+                                            <button 
+                                                onClick={() => { setSelectedUser(user); document.getElementById('suspend_modal').showModal(); }} 
+                                                className="btn btn-sm btn-ghost text-error bg-error/10 hover:bg-error/20 rounded-lg tooltip"
+                                                data-tip="Suspend User"
+                                            >
+                                                <FaBan />
+                                            </button>}
+                                    </div>
                                 </td>
                             </tr>
                         ))}
@@ -124,30 +166,40 @@ const ManageUsers = () => {
                 </table>
             </div>
 
-            {/* Suspend Modal (Challenge Requirement) */}
-            <dialog id="suspend_modal" className="modal">
-                <div className="modal-box">
-                    <h3 className="font-bold text-lg text-error">Suspend User: {selectedUser?.name}</h3>
-                    <p className="py-2 text-sm text-gray-500">This action will prevent the user from logging in or applying for loans.</p>
+            {/* --- SUSPEND MODAL (Challenge Requirement) --- */}
+            <dialog id="suspend_modal" className="modal modal-bottom sm:modal-middle backdrop-blur-sm">
+                <div className="modal-box bg-base-100 border border-base-300 text-base-content shadow-2xl transition-colors">
+                    <h3 className="font-bold text-2xl text-error flex items-center gap-2 border-b border-base-300 pb-3 mb-4">
+                        <FaBan /> Suspend User
+                    </h3>
+                    
+                    <div className="bg-base-200 p-4 rounded-xl border border-base-300 mb-4">
+                        <p className="font-bold text-base-content">Target: <span className="text-primary">{selectedUser?.name}</span></p>
+                        <p className="text-sm text-base-content/60 mt-1">This action will prevent the user from logging in or applying for loans.</p>
+                    </div>
                     
                     <form onSubmit={handleSuspendUser}>
                         <div className="form-control w-full my-4">
-                            <label className="label"><span className="label-text font-semibold">Reason for Suspension?</span></label>
+                            <label className="label">
+                                <span className="label-text font-bold text-base-content">Reason for Suspension? <span className="text-error">*</span></span>
+                            </label>
                             <textarea 
                                 name="reason" 
-                                className="textarea textarea-bordered h-24" 
+                                className="textarea textarea-bordered h-24 bg-base-200 focus:bg-base-100 focus:border-error focus:ring-2 ring-error/20 text-base-content rounded-xl transition-all" 
                                 placeholder="E.g., Violation of terms, fraudulent activity..." 
                                 required
                             ></textarea>
                         </div>
-                        <div className="modal-action">
-                            <button type="submit" className="btn btn-error text-white">Confirm Suspend</button>
+                        <div className="modal-action border-t border-base-300 pt-4 mt-6">
                             <button 
                                 type="button" 
-                                className="btn" 
+                                className="btn btn-ghost text-base-content rounded-xl" 
                                 onClick={() => document.getElementById('suspend_modal').close()}
                             >
                                 Cancel
+                            </button>
+                            <button type="submit" className="btn btn-error text-white rounded-xl shadow-lg shadow-error/30">
+                                Confirm Suspend
                             </button>
                         </div>
                     </form>

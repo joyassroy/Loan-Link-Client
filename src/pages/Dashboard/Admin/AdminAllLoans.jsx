@@ -37,7 +37,6 @@ const AdminAllLoans= () => {
     ];
 
     // C. Bar Chart Data (Category wise)
-    // Eita ektu tricky, amra category gulo count korbo
     const categoryCounts = {};
     applications.forEach(app => {
         const cat = app.loanCategory || "Others";
@@ -50,46 +49,52 @@ const AdminAllLoans= () => {
         count: categoryCounts[key]
     }));
 
+    // Recharts Dynamic Colors for Dark/Light Mode compatibility
+    const axisColor = "var(--fallback-bc, oklch(var(--bc) / 0.5))";
+    const gridColor = "var(--fallback-b3, oklch(var(--b3) / 0.2))";
+    const tooltipBg = "var(--fallback-b1, oklch(var(--b1)))";
+    const tooltipColor = "var(--fallback-bc, oklch(var(--bc)))";
+
     return (
-        <div className="p-6 bg-gray-50 min-h-screen font-sans">
-            <h2 className="text-3xl font-extrabold text-gray-800 mb-6">Dashboard Overview</h2>
+        <div className="p-6 bg-base-200 min-h-screen font-sans transition-colors duration-300 pb-20">
+            <h2 className="text-3xl font-extrabold text-base-content mb-6">Dashboard Overview</h2>
 
             {/* --- 1. SUMMARY CARDS --- */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                 
                 {/* Total Users */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-                    <div className="p-4 bg-blue-100 text-blue-600 rounded-full text-2xl"><FaUsers /></div>
+                <div className="bg-base-100 p-6 rounded-2xl shadow-sm border border-base-300 flex items-center gap-4 transition-colors">
+                    <div className="p-4 bg-info/20 text-info rounded-full text-2xl"><FaUsers /></div>
                     <div>
-                        <p className="text-gray-500 font-bold text-xs uppercase">Total Users</p>
-                        <h3 className="text-3xl font-extrabold text-gray-800">{users.length}</h3>
+                        <p className="text-base-content/60 font-bold text-xs uppercase">Total Users</p>
+                        <h3 className="text-3xl font-extrabold text-base-content">{users.length}</h3>
                     </div>
                 </div>
 
                 {/* Total Applications */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-                    <div className="p-4 bg-purple-100 text-purple-600 rounded-full text-2xl"><FaFileInvoiceDollar /></div>
+                <div className="bg-base-100 p-6 rounded-2xl shadow-sm border border-base-300 flex items-center gap-4 transition-colors">
+                    <div className="p-4 bg-primary/20 text-primary rounded-full text-2xl"><FaFileInvoiceDollar /></div>
                     <div>
-                        <p className="text-gray-500 font-bold text-xs uppercase">Total Applications</p>
-                        <h3 className="text-3xl font-extrabold text-gray-800">{applications.length}</h3>
+                        <p className="text-base-content/60 font-bold text-xs uppercase">Total Applications</p>
+                        <h3 className="text-3xl font-extrabold text-base-content">{applications.length}</h3>
                     </div>
                 </div>
 
                 {/* Total Disbursed Amount */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-                    <div className="p-4 bg-green-100 text-green-600 rounded-full text-2xl"><FaDollarSign /></div>
+                <div className="bg-base-100 p-6 rounded-2xl shadow-sm border border-base-300 flex items-center gap-4 transition-colors">
+                    <div className="p-4 bg-success/20 text-success rounded-full text-2xl"><FaDollarSign /></div>
                     <div>
-                        <p className="text-gray-500 font-bold text-xs uppercase">Total Requested</p>
-                        <h3 className="text-3xl font-extrabold text-gray-800">${totalLoanAmount.toLocaleString()}</h3>
+                        <p className="text-base-content/60 font-bold text-xs uppercase">Total Requested</p>
+                        <h3 className="text-3xl font-extrabold text-base-content">${totalLoanAmount.toLocaleString()}</h3>
                     </div>
                 </div>
 
-                {/* Approval Rate (Optional Math) */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-                    <div className="p-4 bg-orange-100 text-orange-600 rounded-full text-2xl"><FaChartPie /></div>
+                {/* Pending Requests */}
+                <div className="bg-base-100 p-6 rounded-2xl shadow-sm border border-base-300 flex items-center gap-4 transition-colors">
+                    <div className="p-4 bg-warning/20 text-warning rounded-full text-2xl"><FaChartPie /></div>
                     <div>
-                        <p className="text-gray-500 font-bold text-xs uppercase">Pending Requests</p>
-                        <h3 className="text-3xl font-extrabold text-gray-800">
+                        <p className="text-base-content/60 font-bold text-xs uppercase">Pending Requests</p>
+                        <h3 className="text-3xl font-extrabold text-base-content">
                             {applications.filter(a => a.status === 'pending').length}
                         </h3>
                     </div>
@@ -100,15 +105,25 @@ const AdminAllLoans= () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 
                 {/* Bar Chart: Loan Categories */}
-                <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
-                    <h3 className="text-xl font-bold text-gray-700 mb-6">Popular Loan Categories</h3>
+                <div className="bg-base-100 p-6 rounded-2xl shadow-lg border border-base-300 transition-colors">
+                    <h3 className="text-xl font-bold text-base-content mb-6">Popular Loan Categories</h3>
                     <div className="h-80 w-full">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={barChartData}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                <XAxis dataKey="name" tick={{fontSize: 12}} />
-                                <YAxis />
-                                <Tooltip contentStyle={{borderRadius: '10px', border: 'none', boxShadow: '0 4px 10px rgba(0,0,0,0.1)'}} />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
+                                <XAxis dataKey="name" tick={{fontSize: 12, fill: axisColor}} stroke={axisColor} />
+                                <YAxis tick={{fill: axisColor}} stroke={axisColor} />
+                                <Tooltip 
+                                    contentStyle={{
+                                        backgroundColor: tooltipBg, 
+                                        color: tooltipColor, 
+                                        borderRadius: '10px', 
+                                        borderColor: gridColor, 
+                                        boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
+                                    }} 
+                                    itemStyle={{color: tooltipColor}}
+                                    cursor={{fill: gridColor}}
+                                />
                                 <Bar dataKey="count" fill="#4F46E5" radius={[10, 10, 0, 0]} barSize={50} />
                             </BarChart>
                         </ResponsiveContainer>
@@ -116,8 +131,8 @@ const AdminAllLoans= () => {
                 </div>
 
                 {/* Pie Chart: Application Status */}
-                <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
-                    <h3 className="text-xl font-bold text-gray-700 mb-6">Application Status</h3>
+                <div className="bg-base-100 p-6 rounded-2xl shadow-lg border border-base-300 transition-colors">
+                    <h3 className="text-xl font-bold text-base-content mb-6">Application Status</h3>
                     <div className="h-80 w-full flex justify-center items-center">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
@@ -134,8 +149,17 @@ const AdminAllLoans= () => {
                                         <Cell key={`cell-${index}`} fill={entry.color} />
                                     ))}
                                 </Pie>
-                                <Tooltip />
-                                <Legend verticalAlign="bottom" height={36} />
+                                <Tooltip 
+                                    contentStyle={{
+                                        backgroundColor: tooltipBg, 
+                                        color: tooltipColor, 
+                                        borderRadius: '10px', 
+                                        borderColor: gridColor,
+                                        boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
+                                    }}
+                                    itemStyle={{color: tooltipColor}}
+                                />
+                                <Legend verticalAlign="bottom" height={36} wrapperStyle={{color: axisColor, fontWeight: 'bold'}} />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>

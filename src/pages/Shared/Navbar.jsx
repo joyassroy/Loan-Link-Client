@@ -3,35 +3,43 @@ import { Link, NavLink } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import { FaSignOutAlt, FaThLarge, FaUserCog, FaBars } from "react-icons/fa";
 
+// --- CUSTOM LL ICON (Matched with Home Page) ---
+const LLIcon = ({ size = "w-10 h-10", strokeWidth = "8" }) => (
+    <svg viewBox="0 0 100 100" className={`${size} drop-shadow-md`}>
+        <defs>
+            <linearGradient id="navLLGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#22D3EE" />
+                <stop offset="100%" stopColor="#3B82F6" />
+            </linearGradient>
+        </defs>
+        <path d="M 30 15 V 85 H 15 M 15 15 V 85 H 60 Q 65 85 65 80 V 65 H 40 Q 35 65 35 70 V 85" 
+              fill="none" stroke="url(#navLLGradient)" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
 const Navbar = () => {
     const { user, logOut } = useAuth();
 
     // --- THEME STATE MANAGEMENT ---
-    const [theme, setTheme] = useState(localStorage.getItem("theme") ? localStorage.getItem("theme") : "light");
+    const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
 
     const handleToggle = (e) => {
-        if (e.target.checked) {
-            setTheme("dark");
-        } else {
-            setTheme("light");
-        }
+        const newTheme = e.target.checked ? "dark" : "light";
+        setTheme(newTheme);
     };
 
     useEffect(() => {
         localStorage.setItem("theme", theme);
-        const localTheme = localStorage.getItem("theme");
-        document.querySelector("html").setAttribute("data-theme", localTheme);
+        document.documentElement.setAttribute("data-theme", theme);
     }, [theme]);
-    // ------------------------------
 
     const handleLogOut = () => {
         logOut().then(() => {}).catch(console.error);
     };
 
-    // Active Link Style (Updated for Dark Mode support)
     const navStyle = ({ isActive }) => 
-        `text-base font-semibold px-4 py-2 rounded-lg transition-all duration-300 ${
-            isActive ? "text-primary bg-primary/10" : "text-base-content/80 hover:text-primary hover:bg-base-200"
+        `text-sm md:text-base font-bold px-4 py-2 rounded-lg transition-all duration-300 uppercase tracking-tight ${
+            isActive ? "text-primary bg-primary/5" : "text-base-content/70 hover:text-primary hover:bg-base-200"
         }`;
 
     const navOptions = <>
@@ -41,24 +49,29 @@ const Navbar = () => {
     </>;
 
     return (
-        <div className="navbar bg-base-100/90 backdrop-blur-lg sticky top-0 z-50 border-b border-base-300 px-4 md:px-8 py-3 h-20 shadow-sm transition-all duration-300">
+        <div className="navbar bg-base-100/80 backdrop-blur-xl sticky top-0 z-[100] border-b border-base-content/5 px-4 md:px-8 h-20 shadow-sm transition-all">
             <div className="navbar-start">
                 {/* Mobile Dropdown */}
                 <div className="dropdown">
                     <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden pl-0 text-base-content/80">
-                        <FaBars size={24} />
+                        <FaBars size={22} />
                     </div>
-                    <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-52 gap-2 border border-base-300">
+                    <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-3 shadow-2xl bg-base-100 rounded-[2rem] w-64 gap-2 border border-base-content/5">
                         {navOptions}
                     </ul>
                 </div>
                 
-                {/* --- PREMIUM LOGO --- */}
-                <Link to="/" className="text-2xl font-extrabold tracking-wide text-base-content flex items-center gap-2 group">
-                    <div className="w-10 h-10 bg-gradient-to-tr from-primary to-secondary rounded-xl flex items-center justify-center text-white text-sm shadow-md shadow-primary/30 transform group-hover:rotate-12 transition-transform duration-300">
-                        LL
+                {/* --- UPDATED PREMIUM LOGO --- */}
+                <Link to="/" className="flex items-center gap-3 group">
+                    <div className="transform group-hover:scale-110 group-hover:rotate-[10deg] transition-all duration-500">
+                        <LLIcon size="w-10 h-10 md:w-12 md:h-12" strokeWidth="10" />
                     </div>
-                    <span className="hidden sm:inline group-hover:text-primary transition-colors">Loan<span className="text-primary group-hover:text-secondary">Link</span></span>
+                    <div className="flex flex-col leading-none">
+                        <span className="text-xl md:text-2xl font-[1000] uppercase tracking-tighter text-base-content group-hover:text-primary transition-colors">
+                            Loan<span className="text-primary italic group-hover:text-base-content">Link</span>
+                        </span>
+                        <span className="text-[8px] font-black uppercase tracking-[0.3em] opacity-40 group-hover:opacity-100 transition-opacity">Protocol v3.0</span>
+                    </div>
                 </Link>
             </div>
 
@@ -72,83 +85,60 @@ const Navbar = () => {
             {/* Navbar End */}
             <div className="navbar-end gap-3 flex items-center">
                 
-                {/* 🌙 THEME TOGGLE BUTTON --- */}
-                <label className="swap swap-rotate mr-2 text-base-content hover:text-primary transition-colors">
-                    <input 
-                        type="checkbox" 
-                        onChange={handleToggle} 
-                        checked={theme === "light" ? false : true} 
-                    />
-                    
-                    {/* Sun icon */}
+                {/* THEME TOGGLE */}
+                <label className="swap swap-rotate mr-2 text-base-content hover:text-primary transition-all hover:scale-110">
+                    <input type="checkbox" onChange={handleToggle} checked={theme === "dark"} />
                     <svg className="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/></svg>
-                    
-                    {/* Moon icon */}
                     <svg className="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/></svg>
                 </label>
-                {/* --------------------------- */}
 
                 {user ? (
                     <div className="dropdown dropdown-end">
-                        {/* Avatar Trigger */}
-                        <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar ring ring-primary ring-offset-base-100 ring-offset-2 hover:ring-offset-4 transition-all duration-300">
+                        <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar ring-2 ring-primary ring-offset-2 ring-offset-base-100 hover:scale-105 transition-all duration-300">
                             <div className="w-10 rounded-full">
                                 <img src={user?.photoURL || "https://i.ibb.co/hYsm3PL/user.png"} alt="user" />
                             </div>
                         </div>
 
-                        {/* --- MODERN DROPDOWN CONTENT --- */}
-                        <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-0 shadow-2xl bg-base-100 rounded-2xl w-72 border border-base-300 overflow-hidden">
-                            
-                            {/* Header Section (User Info) */}
-                            <div className="bg-gradient-to-r from-primary/10 to-secondary/10 p-6 flex flex-col items-center gap-3 border-b border-base-300">
-                                <div className="avatar">
-                                    <div className="w-16 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 shadow-md">
+                        <ul tabIndex={0} className="menu menu-sm dropdown-content mt-4 z-[1] p-0 shadow-2xl bg-base-100 rounded-[2rem] w-80 border border-base-content/10 overflow-hidden">
+                            <div className="bg-gradient-to-br from-primary/20 to-secondary/20 p-8 flex flex-col items-center gap-4 text-center">
+                                <div className="avatar ring-4 ring-white rounded-full">
+                                    <div className="w-20 rounded-full">
                                         <img src={user?.photoURL || "https://i.ibb.co/hYsm3PL/user.png"} alt="user" />
                                     </div>
                                 </div>
-                                <div className="text-center">
-                                    <h3 className="font-bold text-base-content text-lg">{user?.displayName}</h3>
-                                    <p className="text-xs text-base-content/70 font-medium">{user?.email}</p>
+                                <div>
+                                    <h3 className="font-black text-xl uppercase italic tracking-tighter leading-tight">{user?.displayName}</h3>
+                                    <p className="text-[10px] font-bold opacity-60 uppercase tracking-widest mt-1">{user?.email}</p>
                                 </div>
-                                <span className="badge badge-primary badge-sm uppercase font-bold tracking-wider">Online</span>
+                                <span className="px-3 py-1 bg-primary text-[10px] text-white font-black rounded-full uppercase tracking-widest">Active Link</span>
                             </div>
 
-                            {/* Menu Links */}
-                            <div className="p-2 flex flex-col gap-1">
+                            <div className="p-3 grid grid-cols-1 gap-1">
                                 <li>
-                                    <Link to="/dashboard/profile" className="flex items-center gap-3 py-3 px-4 font-semibold text-base-content/80 hover:bg-base-200 hover:text-primary rounded-xl transition-all">
-                                        <div className="p-2 bg-blue-50 text-blue-500 rounded-lg"><FaThLarge /></div>
-                                        Dashboard
+                                    <Link to="/dashboard" className="flex items-center gap-4 p-4 font-black uppercase text-xs hover:bg-primary/10 rounded-2xl transition-all">
+                                        <FaThLarge className="text-primary text-lg" /> Dashboard
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link to="/dashboard/profile" className="flex items-center gap-3 py-3 px-4 font-semibold text-base-content/80 hover:bg-base-200 hover:text-primary rounded-xl transition-all">
-                                        <div className="p-2 bg-purple-50 text-purple-500 rounded-lg"><FaUserCog /></div>
-                                        Edit Profile
+                                    <Link to="/dashboard/profile" className="flex items-center gap-4 p-4 font-black uppercase text-xs hover:bg-primary/10 rounded-2xl transition-all">
+                                        <FaUserCog className="text-primary text-lg" /> Protocol Settings
                                     </Link>
                                 </li>
-                            </div>
-
-                            <div className="divider my-0 opacity-50"></div>
-
-                            {/* Logout Button */}
-                            <div className="p-2">
-                                <button 
-                                    onClick={handleLogOut} 
-                                    className="flex items-center w-full gap-3 py-3 px-4 font-bold text-red-500 hover:bg-red-50 hover:dark:bg-red-500/10 rounded-xl transition-all"
-                                >
-                                    <div className="p-2 bg-red-100 dark:bg-red-500/20 text-red-500 rounded-lg"><FaSignOutAlt /></div>
-                                    Logout
-                                </button>
+                                <div className="divider my-1 opacity-50 px-4"></div>
+                                <li>
+                                    <button onClick={handleLogOut} className="flex items-center gap-4 p-4 font-black uppercase text-xs text-error hover:bg-error/10 rounded-2xl transition-all">
+                                        <FaSignOutAlt className="text-lg" /> Terminate Link
+                                    </button>
+                                </li>
                             </div>
                         </ul>
                     </div>
                 ) : (
-                    <div className="flex items-center gap-3">
-                        <Link to="/login" className="hidden sm:flex text-base-content/80 font-bold hover:text-primary transition-colors px-4">Login</Link>
-                        <Link to="/register" className="btn btn-primary text-white rounded-xl shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-0.5 transition-all bg-gradient-to-r from-primary to-secondary border-none px-6">
-                            Get Started
+                    <div className="flex items-center gap-4">
+                        <Link to="/login" className="hidden sm:inline-block text-xs font-black uppercase tracking-widest hover:text-primary transition-colors">Login</Link>
+                        <Link to="/register" className="btn btn-primary btn-md rounded-xl px-6 font-black uppercase italic shadow-lg shadow-primary/20 border-none hover:scale-105 transition-all">
+                            Get Linked
                         </Link>
                     </div>
                 )}
