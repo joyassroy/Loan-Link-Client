@@ -64,7 +64,7 @@ const Login = () => {
         
         // (এখানে তোমার ডাটাবেসে থাকা ডেমো অ্যাডমিন ও ইউজারের আসল ইমেইল/পাসওয়ার্ড বসাবে)
         const email = role === 'admin' ? "assdfd@gmail.com" : "test@gmail.com"; 
-        const password = role === 'admin' ? "123456Joy":"123456"; 
+        const password = role === 'admin' ? "123456":"123456"; 
 
         // একটু ফেক ডিলে (Delay) দিচ্ছি যাতে ইউজার ফিল করতে পারে যে লগইন হচ্ছে
         setTimeout(() => {
